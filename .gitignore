@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment files (contain DB password, JWT secret, admin credentials)
+# .env.example stays in git as the template
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
