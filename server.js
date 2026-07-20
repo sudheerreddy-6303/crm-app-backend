@@ -7,6 +7,8 @@ const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const leadRoutes = require("./routes/leads");
 const dashboardRoutes = require("./routes/dashboard");
+// ADDED: Service Calls module
+const serviceCallRoutes = require("./routes/serviceCalls");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -45,6 +47,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+// ADDED: Service Calls module
+app.use("/api/service-calls", serviceCallRoutes);
 
 const PORT = process.env.PORT || 5000;
 

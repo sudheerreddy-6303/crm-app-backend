@@ -96,12 +96,13 @@ router.post("/", adminOnly, async (req, res) => {
     }
     const [result] = await pool.query(
       `INSERT INTO leads
-       (name, primary_phone, assigned_to, first_calling_date, second_calling_date,
+       (name, project_name, primary_phone, assigned_to, first_calling_date, second_calling_date,
         call_category, quote_sent, order_booked, whatsapp_sent_date, whatsapp_category,
         calling_remark, next_call_date, priority, source, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        b.name, b.primary_phone, b.assigned_to || null,
+        // ADDED: project_name (optional here; mandatory only during Excel import)
+        b.name, b.project_name || "", b.primary_phone, b.assigned_to || null,
         dateOrNull(b.first_calling_date), dateOrNull(b.second_calling_date),
         clean(b.call_category, CALL_CATEGORIES), clean(b.quote_sent, YES_NO),
         clean(b.order_booked, YES_NO), dateOrNull(b.whatsapp_sent_date),
@@ -150,6 +151,8 @@ router.put("/:id", async (req, res) => {
     // Admin-only fields
     if (isAdmin) {
       if ("name" in b && b.name) push("name", b.name);
+      // ADDED: project_name editable by admin
+      if ("project_name" in b) push("project_name", b.project_name || "");
       if ("primary_phone" in b && b.primary_phone) push("primary_phone", b.primary_phone);
       if ("assigned_to" in b) push("assigned_to", b.assigned_to || null);
       if ("source" in b) push("source", b.source || "");
@@ -243,17 +246,46 @@ router.post("/import", adminOnly, async (req, res) => {
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(400).json({ error: "rows array is required" });
     }
+    // ADDED: reject duplicates that already exist in the database, so importing
+    // the same sheet again does NOT create duplicate leads. We load all existing
+    // phone numbers once into a Set (fast lookup), then skip any row whose phone
+    // is already present. Newly inserted phones are added to the Set as well so
+    // duplicates inside the same import batch are also rejected.
+    const [existingRows] = await pool.query("SELECT primary_phone FROM leads");
+    const existingPhones = new Set(existingRows.map((r) => String(r.primary_phone).trim()));
+    let duplicates = 0;
+    // ADDED: count rows rejected because the phone number is not a valid length.
+    // Excel sometimes corrupts phone cells via scientific notation (e.g. 9.78991E+20
+    // expands to a 21-digit garbage value). primary_phone is VARCHAR(20), so any
+    // phone longer than 15 digits (world's longest valid numbers) or shorter than
+    // 10 digits is rejected instead of crashing the whole import with ER_DATA_TOO_LONG.
+    let invalidPhone = 0;
+    // ADDED: Project Name is mandatory when importing. Rows without a project
+    // name are rejected and counted separately so the summary message shows why.
+    let missingProject = 0;
     let inserted = 0, skipped = 0;
     for (const b of rows) {
       if (!b.name || !b.primary_phone) { skipped++; continue; }
+      // ADDED: mandatory project name check
+      if (!b.project_name || !String(b.project_name).trim()) { missingProject++; continue; }
+      // ADDED: keep digits only, then validate length (10-15 digits)
+      const digitsOnly = String(b.primary_phone).replace(/\D/g, "");
+      if (digitsOnly.length < 10 || digitsOnly.length > 15) { invalidPhone++; continue; }
+      // ADDED: skip if this phone number already exists (duplicate sheet / re-import)
+      const phoneKey = digitsOnly;
+      if (existingPhones.has(phoneKey)) { duplicates++; continue; }
+      existingPhones.add(phoneKey);
       await pool.query(
         `INSERT INTO leads
-         (name, primary_phone, assigned_to, first_calling_date, second_calling_date,
+         (name, project_name, primary_phone, assigned_to, first_calling_date, second_calling_date,
           call_category, quote_sent, order_booked, whatsapp_sent_date, whatsapp_category,
           calling_remark, next_call_date, priority, source, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          b.name, String(b.primary_phone),
+          // ORIGINAL: b.name, String(b.primary_phone),
+          // ADDED: insert the sanitized digits-only phone (validated 10-15 digits above)
+          // ADDED: project_name (mandatory, validated above)
+          b.name, String(b.project_name).trim(), digitsOnly,
           // ORIGINAL: b.assigned_to || null,
           // ADDED: also accepts a telecaller name/email from the "Telecaller" column
           resolveAssigned(b),
@@ -267,7 +299,14 @@ router.post("/import", adminOnly, async (req, res) => {
       );
       inserted++;
     }
-    res.json({ message: `Imported ${inserted} lead(s), skipped ${skipped}` , inserted, skipped });
+    // ORIGINAL: res.json({ message: `Imported ${inserted} lead(s), skipped ${skipped}` , inserted, skipped });
+    // ADDED: also report duplicates that were rejected because they already exist
+    const dupNote = duplicates > 0 ? `, rejected ${duplicates} duplicate(s) already in the database` : "";
+    // ADDED: also report rows rejected for invalid phone length
+    const invNote = invalidPhone > 0 ? `, rejected ${invalidPhone} row(s) with invalid phone numbers` : "";
+    // ADDED: report rows rejected because Project Name (mandatory) was missing
+    const projNote = missingProject > 0 ? `, rejected ${missingProject} row(s) missing the mandatory Project Name` : "";
+    res.json({ message: `Imported ${inserted} lead(s), skipped ${skipped}${dupNote}${invNote}${projNote}`, inserted, skipped, duplicates, invalidPhone, missingProject });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

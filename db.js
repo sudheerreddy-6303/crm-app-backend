@@ -36,6 +36,7 @@ async function initDb() {
       CREATE TABLE IF NOT EXISTS leads (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(150) NOT NULL,
+        project_name VARCHAR(150) DEFAULT '',
         primary_phone VARCHAR(20) NOT NULL,
         assigned_to INT NULL,
         first_calling_date DATE NULL,
@@ -66,6 +67,36 @@ async function initDb() {
         log_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
+    // ADDED: migration for existing databases. CREATE TABLE IF NOT EXISTS above
+    // only applies to fresh installs, so on an already-deployed database we add
+    // the project_name column if it's missing. Safe to run on every startup.
+    const [pnCol] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'leads' AND COLUMN_NAME = 'project_name'`
+    );
+    if (pnCol[0].cnt === 0) {
+      console.log("Migration: adding project_name column to leads table");
+      await conn.query("ALTER TABLE leads ADD COLUMN project_name VARCHAR(150) DEFAULT '' AFTER name");
+    }
+
+    // ADDED: Service Calls table (name, phone, category dropdown, location, remarks)
+    // category is VARCHAR (not ENUM) so new categories can be added later
+    // without a database migration
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS service_calls (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
+        category VARCHAR(50) DEFAULT '',
+        location VARCHAR(200) DEFAULT '',
+        remarks TEXT,
+        created_by INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       )
     `);
 
