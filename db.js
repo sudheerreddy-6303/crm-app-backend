@@ -100,6 +100,84 @@ async function initDb() {
       )
     `);
 
+    // ADDED: Walk-ins table - records customers who walk in to an experience
+    // centre. purpose is VARCHAR (not ENUM) so new purposes can be added later
+    // without a database migration, matching the service_calls pattern.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS walkins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
+        alt_phone VARCHAR(20) DEFAULT '',
+        project_name VARCHAR(150) DEFAULT '',
+        visit_date DATE NULL,
+        purpose VARCHAR(80) DEFAULT '',
+        location VARCHAR(200) DEFAULT '',
+        site_location VARCHAR(200) DEFAULT '',
+        city VARCHAR(100) DEFAULT '',
+        address TEXT,
+        budget VARCHAR(80) DEFAULT '',
+        attended_by VARCHAR(150) DEFAULT '',
+        remarks TEXT,
+        created_by INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
+    // ADDED: migrations for existing databases. CREATE TABLE IF NOT EXISTS above
+    // only applies to fresh installs, so on an already-deployed database we add
+    // any new walkins columns that are missing. Safe to run on every startup.
+    const walkinCols = [
+      ["alt_phone", "VARCHAR(20) DEFAULT '' AFTER phone"],
+      ["project_name", "VARCHAR(150) DEFAULT '' AFTER alt_phone"],
+      ["site_location", "VARCHAR(200) DEFAULT '' AFTER location"],
+      ["city", "VARCHAR(100) DEFAULT '' AFTER site_location"],
+      ["address", "TEXT AFTER city"],
+    ];
+    for (const [col, def] of walkinCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'walkins' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to walkins table`);
+        await conn.query(`ALTER TABLE walkins ADD COLUMN ${col} ${def}`);
+      }
+    }
+
+    // ADDED: Project Details table. type / status are VARCHAR (not ENUM) so new
+    // options can be added later without a DB migration. Numeric counters default
+    // to 0. Being a brand-new table, CREATE TABLE IF NOT EXISTS creates it on the
+    // next backend start for existing deployments too - no manual SQL needed.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS projects (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        project_name VARCHAR(150) NOT NULL,
+        owner_contact VARCHAR(20) DEFAULT '',
+        secondary_number VARCHAR(20) DEFAULT '',
+        location VARCHAR(200) DEFAULT '',
+        address TEXT,
+        type VARCHAR(50) DEFAULT '',
+        sales_executive VARCHAR(150) DEFAULT '',
+        phone1 VARCHAR(20) DEFAULT '',
+        phone2 VARCHAR(20) DEFAULT '',
+        status VARCHAR(60) DEFAULT '',
+        data_in_crm VARCHAR(3) DEFAULT '',
+        marketing VARCHAR(3) DEFAULT '',
+        rounds_called INT DEFAULT 0,
+        last_calling_date DATE NULL,
+        units_booked_interiors INT DEFAULT 0,
+        units_sold INT DEFAULT 0,
+        created_by INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
     // Seed admin from env variables (never hardcode credentials in code)
     const adminEmail = process.env.ADMIN_EMAIL || "admin@telecrm.local";
     const adminPassword = process.env.ADMIN_PASSWORD || "ChangeMe@123";

@@ -9,6 +9,10 @@ const leadRoutes = require("./routes/leads");
 const dashboardRoutes = require("./routes/dashboard");
 // ADDED: Service Calls module
 const serviceCallRoutes = require("./routes/serviceCalls");
+// ADDED: Walk-ins module
+const walkinRoutes = require("./routes/walkins");
+// ADDED: Project Details module
+const projectRoutes = require("./routes/projects");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -49,6 +53,10 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 // ADDED: Service Calls module
 app.use("/api/service-calls", serviceCallRoutes);
+// ADDED: Walk-ins module
+app.use("/api/walkins", walkinRoutes);
+// ADDED: Project Details module
+app.use("/api/projects", projectRoutes);
 
 const PORT = process.env.PORT || 5000;
 

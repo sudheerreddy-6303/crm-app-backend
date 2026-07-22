@@ -49,6 +49,9 @@ router.get("/", async (req, res) => {
 
     let performance = [];
     let unassigned = 0;
+    // ADDED: total walk-ins (admin only). When a date range is active it counts
+    // walk-ins whose visit_date falls in the range; otherwise it counts all.
+    let walkins = 0;
     if (isAdmin) {
       // ORIGINAL: joined all leads. Now the same range applies inside the JOIN,
       // so per-telecaller numbers match the selected period.
@@ -76,6 +79,16 @@ router.get("/", async (req, res) => {
         `SELECT COUNT(*) AS c FROM leads l WHERE ${unConds.join(" AND ")}`, unParams
       );
       unassigned = un.c;
+
+      // ADDED: count walk-ins. Range (when active) applies to visit_date.
+      const wkConds = [];
+      const wkParams = [];
+      if (rangeActive) { wkConds.push("visit_date BETWEEN ? AND ?"); wkParams.push(lo, hi); }
+      const wkWhere = wkConds.length ? `WHERE ${wkConds.join(" AND ")}` : "";
+      const [[wk]] = await pool.query(
+        `SELECT COUNT(*) AS c FROM walkins ${wkWhere}`, wkParams
+      );
+      walkins = wk.c;
     }
 
     // Follow-ups: ORIGINAL always showed the next 3 days. With a range selected,
@@ -97,7 +110,7 @@ router.get("/", async (req, res) => {
       fuParams
     );
 
-    res.json({ totals: totals[0], performance, unassigned, followups });
+    res.json({ totals: totals[0], performance, unassigned, walkins, followups });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
