@@ -16,6 +16,11 @@ router.get("/", async (req, res) => {
     const from = isDate(req.query.from) ? req.query.from : null;
     const to = isDate(req.query.to) ? req.query.to : null;
     const rangeActive = Boolean(from || to);
+    // ADDED: optional project filter ?project=<project_name>. When given, every
+    // card/total/performance number below counts only leads whose project_name
+    // matches. Leads link to projects by this name string (leads.project_name).
+    const project = String(req.query.project || "").trim();
+    const projectActive = Boolean(project);
     const lo = from || "1000-01-01";
     const hi = to || "9999-12-31";
     // A lead is "in range" if any activity date falls within from..to
@@ -30,6 +35,8 @@ router.get("/", async (req, res) => {
     const params = [];
     if (!isAdmin) { conds.push("l.assigned_to = ?"); params.push(req.user.id); }
     if (rangeActive) { conds.push(rangeSql); params.push(...rangeParams); }
+    // ADDED: project filter for the top KPI cards
+    if (projectActive) { conds.push("l.project_name = ?"); params.push(project); }
     const scope = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
 
     const [totals] = await pool.query(
@@ -55,7 +62,13 @@ router.get("/", async (req, res) => {
     if (isAdmin) {
       // ORIGINAL: joined all leads. Now the same range applies inside the JOIN,
       // so per-telecaller numbers match the selected period.
-      const joinCond = rangeActive ? `l.assigned_to = u.id AND ${rangeSql}` : "l.assigned_to = u.id";
+      // ADDED: the project filter is applied inside the JOIN too, so each
+      // telecaller's row reflects only the selected project.
+      const joinParts = ["l.assigned_to = u.id"];
+      const joinParams = [];
+      if (rangeActive) { joinParts.push(rangeSql); joinParams.push(...rangeParams); }
+      if (projectActive) { joinParts.push("l.project_name = ?"); joinParams.push(project); }
+      const joinCond = joinParts.join(" AND ");
       const [perf] = await pool.query(
         `SELECT u.id, u.name, u.status,
            COUNT(l.id) AS total_leads,
@@ -69,12 +82,14 @@ router.get("/", async (req, res) => {
          LEFT JOIN leads l ON ${joinCond}
          WHERE u.role = 'telecaller'
          GROUP BY u.id ORDER BY orders_booked DESC, interested DESC`,
-        rangeActive ? rangeParams : []
+        joinParams
       );
       performance = perf;
       const unConds = ["l.assigned_to IS NULL"];
       const unParams = [];
       if (rangeActive) { unConds.push(rangeSql); unParams.push(...rangeParams); }
+      // ADDED: project filter for unassigned leads
+      if (projectActive) { unConds.push("l.project_name = ?"); unParams.push(project); }
       const [[un]] = await pool.query(
         `SELECT COUNT(*) AS c FROM leads l WHERE ${unConds.join(" AND ")}`, unParams
       );
@@ -84,6 +99,8 @@ router.get("/", async (req, res) => {
       const wkConds = [];
       const wkParams = [];
       if (rangeActive) { wkConds.push("visit_date BETWEEN ? AND ?"); wkParams.push(lo, hi); }
+      // ADDED: project filter for walk-ins (walkins also has a project_name column)
+      if (projectActive) { wkConds.push("project_name = ?"); wkParams.push(project); }
       const wkWhere = wkConds.length ? `WHERE ${wkConds.join(" AND ")}` : "";
       const [[wk]] = await pool.query(
         `SELECT COUNT(*) AS c FROM walkins ${wkWhere}`, wkParams
@@ -102,6 +119,8 @@ router.get("/", async (req, res) => {
     } else {
       fuConds.push("l.next_call_date IS NOT NULL AND l.next_call_date <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)");
     }
+    // ADDED: project filter for the upcoming follow-ups table
+    if (projectActive) { fuConds.push("l.project_name = ?"); fuParams.push(project); }
     const [followups] = await pool.query(
       `SELECT l.id, l.name, l.primary_phone, l.next_call_date, l.call_category, u.name AS caller_name
        FROM leads l LEFT JOIN users u ON u.id = l.assigned_to
@@ -111,6 +130,36 @@ router.get("/", async (req, res) => {
     );
 
     res.json({ totals: totals[0], performance, unassigned, walkins, followups });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: GET /api/dashboard/projects - distinct project names used to populate
+// the project filter dropdown on the dashboards. A telecaller only sees the
+// projects among their own assigned leads; an admin sees all. Admin may also
+// pass ?assigned=<userId> to scope the list to one telecaller (used by the
+// telecaller detail page). Only names that actually appear on leads are
+// returned, so every option in the dropdown filters to at least one lead.
+router.get("/projects", async (req, res) => {
+  try {
+    const isAdmin = req.user.role === "admin";
+    const conds = ["project_name IS NOT NULL AND project_name <> ''"];
+    const params = [];
+    if (!isAdmin) {
+      conds.push("assigned_to = ?");
+      params.push(req.user.id);
+    } else if (req.query.assigned) {
+      conds.push("assigned_to = ?");
+      params.push(req.query.assigned);
+    }
+    const [rows] = await pool.query(
+      `SELECT project_name FROM leads WHERE ${conds.join(" AND ")}
+       GROUP BY project_name ORDER BY project_name ASC`,
+      params
+    );
+    res.json({ projects: rows.map((r) => r.project_name) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

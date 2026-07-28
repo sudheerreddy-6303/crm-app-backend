@@ -94,6 +94,10 @@ router.get("/:id/activity", adminOnly, async (req, res) => {
     const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v || ""));
     const from = isDate(req.query.from) ? req.query.from : null;
     const to = isDate(req.query.to) ? req.query.to : null;
+    // ADDED: optional project filter ?project=<project_name>. When given, the
+    // calls-per-day table, "Calls today", the KPI cards and the leads list below
+    // all reflect only this telecaller's activity on that project.
+    const project = String(req.query.project || "").trim();
 
     const [userRows] = await pool.query(
       "SELECT id, name, email, phone, role, status, created_at FROM users WHERE id = ?",
@@ -103,27 +107,38 @@ router.get("/:id/activity", adminOnly, async (req, res) => {
 
     // Calls per day from the call log
     // ORIGINAL: fixed last-30-days window. Now uses the calendar range when given.
-    const logConds = ["user_id = ?"];
+    // ADDED: columns are qualified with the c. alias and the table is joined to
+    // leads (only when a project is selected) so the per-day counts can be
+    // filtered by the lead's project_name. call_logs has no project column of
+    // its own, so it borrows it from the lead the call belongs to.
+    const logConds = ["c.user_id = ?"];
     const logParams = [req.params.id];
-    if (from) { logConds.push("DATE(log_date) >= ?"); logParams.push(from); }
-    if (to) { logConds.push("DATE(log_date) <= ?"); logParams.push(to); }
-    if (!from && !to) logConds.push("log_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+    if (from) { logConds.push("DATE(c.log_date) >= ?"); logParams.push(from); }
+    if (to) { logConds.push("DATE(c.log_date) <= ?"); logParams.push(to); }
+    if (!from && !to) logConds.push("c.log_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
+    if (project) { logConds.push("l.project_name = ?"); logParams.push(project); }
+    const logJoin = project ? "JOIN leads l ON l.id = c.lead_id" : "";
     const [daily] = await pool.query(
-      `SELECT DATE(log_date) AS day, COUNT(*) AS calls,
-              SUM(category = 'INTERESTED') AS interested,
-              SUM(category = 'FOLLOW UP') AS follow_up,
-              SUM(category = 'NOT INTERESTED') AS not_interested,
-              SUM(category = 'NOT ANSWERED') AS not_answered
-       FROM call_logs
+      `SELECT DATE(c.log_date) AS day, COUNT(*) AS calls,
+              SUM(c.category = 'INTERESTED') AS interested,
+              SUM(c.category = 'FOLLOW UP') AS follow_up,
+              SUM(c.category = 'NOT INTERESTED') AS not_interested,
+              SUM(c.category = 'NOT ANSWERED') AS not_answered
+       FROM call_logs c ${logJoin}
        WHERE ${logConds.join(" AND ")}
-       GROUP BY DATE(log_date)
+       GROUP BY DATE(c.log_date)
        ORDER BY day DESC`,
       logParams
     );
 
+    // ADDED: "Calls today" also respects the project filter when one is selected.
+    const todayConds = ["c.user_id = ?", "DATE(c.log_date) = CURDATE()"];
+    const todayParams = [req.params.id];
+    if (project) { todayConds.push("l.project_name = ?"); todayParams.push(project); }
+    const todayJoin = project ? "JOIN leads l ON l.id = c.lead_id" : "";
     const [[todayRow]] = await pool.query(
-      "SELECT COUNT(*) AS calls_today FROM call_logs WHERE user_id = ? AND DATE(log_date) = CURDATE()",
-      [req.params.id]
+      `SELECT COUNT(*) AS calls_today FROM call_logs c ${todayJoin} WHERE ${todayConds.join(" AND ")}`,
+      todayParams
     );
 
     // Lead totals for this telecaller
@@ -145,6 +160,9 @@ router.get("/:id/activity", adminOnly, async (req, res) => {
       );
       leadParams.push(lo, hi, lo, hi, lo, hi);
     }
+    // ADDED: project filter for the KPI cards and the leads list below. Uses the
+    // same leadConds so the card numbers and the table always match.
+    if (project) { leadConds.push("project_name = ?"); leadParams.push(project); }
 
     const [[totals]] = await pool.query(
       `SELECT COUNT(*) AS total_leads,

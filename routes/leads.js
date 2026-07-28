@@ -16,7 +16,7 @@ const dateOrNull = (v) => (v && /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v)
 router.get("/", async (req, res) => {
   try {
     const { search = "", category = "", assigned = "", quote = "", order = "", priority = "",
-            due = "", page = 1, limit = 50 } = req.query;
+            due = "", project = "", page = 1, limit = 50 } = req.query;
 
     const where = [];
     const params = [];
@@ -44,6 +44,9 @@ router.get("/", async (req, res) => {
     if (priority) { where.push("l.priority = ?"); params.push(priority); }
     // ADDED: due=today filter for the "Calls due today" dashboard card
     if (due === "today") where.push("l.next_call_date = CURDATE()");
+    // ADDED: project filter - lets the project-filtered dashboard cards drill
+    // down into the matching leads (leads link to a project by project_name)
+    if (project) { where.push("l.project_name = ?"); params.push(project); }
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const lim = Math.min(Number(limit) || 50, 200);
