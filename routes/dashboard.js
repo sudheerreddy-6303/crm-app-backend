@@ -59,6 +59,10 @@ router.get("/", async (req, res) => {
     // ADDED: total walk-ins (admin only). When a date range is active it counts
     // walk-ins whose visit_date falls in the range; otherwise it counts all.
     let walkins = 0;
+    // ADDED: total number of projects in the database (admin only). This is a
+    // straight count of the projects table, independent of the lead date/project
+    // filters, so it always shows how many projects exist overall.
+    let projectsCount = 0;
     if (isAdmin) {
       // ORIGINAL: joined all leads. Now the same range applies inside the JOIN,
       // so per-telecaller numbers match the selected period.
@@ -106,6 +110,15 @@ router.get("/", async (req, res) => {
         `SELECT COUNT(*) AS c FROM walkins ${wkWhere}`, wkParams
       );
       walkins = wk.c;
+
+      // ADDED: count of projects (admin only). Counts the distinct project
+      // names that appear on leads - the same set shown in the Project filter
+      // dropdown (GET /dashboard/projects) - so the card matches that list.
+      const [[pj]] = await pool.query(
+        `SELECT COUNT(DISTINCT project_name) AS c FROM leads
+         WHERE project_name IS NOT NULL AND project_name <> ''`
+      );
+      projectsCount = pj.c;
     }
 
     // Follow-ups: ORIGINAL always showed the next 3 days. With a range selected,
@@ -129,7 +142,7 @@ router.get("/", async (req, res) => {
       fuParams
     );
 
-    res.json({ totals: totals[0], performance, unassigned, walkins, followups });
+    res.json({ totals: totals[0], performance, unassigned, walkins, projects_count: projectsCount, followups });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -160,6 +173,37 @@ router.get("/projects", async (req, res) => {
       params
     );
     res.json({ projects: rows.map((r) => r.project_name) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: GET /api/dashboard/project-summary - one row per project name that
+// appears on leads, with that project's lead counts. Powers the project cards
+// grid (clicking the dashboard "Total projects" card). Admin sees every
+// project; a telecaller sees only projects among their own assigned leads, so
+// the number of rows here matches the "Total projects" card for that user.
+router.get("/project-summary", async (req, res) => {
+  try {
+    const isAdmin = req.user.role === "admin";
+    const conds = ["project_name IS NOT NULL AND project_name <> ''"];
+    const params = [];
+    if (!isAdmin) { conds.push("assigned_to = ?"); params.push(req.user.id); }
+    const [rows] = await pool.query(
+      `SELECT project_name AS name,
+         COUNT(*) AS total_leads,
+         SUM(call_category = 'INTERESTED') AS interested,
+         SUM(call_category = 'FOLLOW UP') AS follow_up,
+         SUM(quote_sent = 'Yes') AS quotes_sent,
+         SUM(order_booked = 'Yes') AS orders_booked
+       FROM leads
+       WHERE ${conds.join(" AND ")}
+       GROUP BY project_name
+       ORDER BY total_leads DESC, project_name ASC`,
+      params
+    );
+    res.json({ projects: rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
