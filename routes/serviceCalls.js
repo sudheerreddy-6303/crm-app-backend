@@ -62,7 +62,8 @@ router.get("/", async (req, res) => {
 // POST /api/service-calls  - create a service call
 router.post("/", async (req, res) => {
   try {
-    const { name = "", phone = "", category = "", location = "", remarks = "" } = req.body;
+    // ADDED: city + experience (optional) accepted alongside the original fields
+    const { name = "", phone = "", category = "", location = "", remarks = "", city = "", experience = "" } = req.body;
 
     if (!String(name).trim() || !String(phone).trim()) {
       return res.status(400).json({ error: "Name and phone number are required" });
@@ -71,10 +72,12 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Invalid category" });
     }
 
+    // ORIGINAL: INSERT (name, phone, category, location, remarks, created_by)
+    // ADDED: also stores city + experience (both default '' in the DB)
     const [result] = await pool.query(
-      `INSERT INTO service_calls (name, phone, category, location, remarks, created_by)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [String(name).trim(), String(phone).trim(), category || "", String(location).trim(), String(remarks).trim(), req.user.id]
+      `INSERT INTO service_calls (name, phone, category, location, remarks, city, experience, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [String(name).trim(), String(phone).trim(), category || "", String(location).trim(), String(remarks).trim(), String(city).trim(), String(experience).trim(), req.user.id]
     );
 
     res.status(201).json({ id: result.insertId, message: "Service call added" });
@@ -87,7 +90,8 @@ router.post("/", async (req, res) => {
 // PUT /api/service-calls/:id  - update a service call
 router.put("/:id", async (req, res) => {
   try {
-    const { name = "", phone = "", category = "", location = "", remarks = "" } = req.body;
+    // ADDED: city + experience (optional) accepted alongside the original fields
+    const { name = "", phone = "", category = "", location = "", remarks = "", city = "", experience = "" } = req.body;
 
     if (!String(name).trim() || !String(phone).trim()) {
       return res.status(400).json({ error: "Name and phone number are required" });
@@ -96,10 +100,12 @@ router.put("/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid category" });
     }
 
+    // ORIGINAL: UPDATE ... SET name, phone, category, location, remarks
+    // ADDED: also updates city + experience
     const [result] = await pool.query(
-      `UPDATE service_calls SET name = ?, phone = ?, category = ?, location = ?, remarks = ?
+      `UPDATE service_calls SET name = ?, phone = ?, category = ?, location = ?, remarks = ?, city = ?, experience = ?
        WHERE id = ?`,
-      [String(name).trim(), String(phone).trim(), category || "", String(location).trim(), String(remarks).trim(), req.params.id]
+      [String(name).trim(), String(phone).trim(), category || "", String(location).trim(), String(remarks).trim(), String(city).trim(), String(experience).trim(), req.params.id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: "Service call not found" });
 
@@ -119,6 +125,88 @@ router.delete("/:id", adminOnly, async (req, res) => {
   } catch (err) {
     console.error("Service call delete error:", err);
     res.status(500).json({ error: "Failed to delete service call" });
+  }
+});
+
+// ADDED: POST /api/service-calls/import  (admin bulk import)
+// Accepts { rows: [{ name, phone, city, location, experience, category }] }
+// mapped from an Excel/CSV with the columns:
+//   Fullname, Mobile number, city, location, experience, category
+// Follows the same conventions as the leads import (routes/leads.js):
+//   - admin only
+//   - phone sanitized to digits only and validated (10-15 digits) so Excel
+//     scientific-notation corruption cannot crash the insert
+//   - duplicate phone numbers (already in the DB, or repeated inside the batch)
+//     are rejected so re-importing the same sheet does not create duplicates
+//   - category is matched case-insensitively against SERVICE_CATEGORIES and
+//     stored in canonical casing; a custom category not in the list is kept
+//     as-is (VARCHAR column) so nothing from the sheet is lost
+router.post("/import", adminOnly, async (req, res) => {
+  try {
+    const { rows } = req.body;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({ error: "rows array is required" });
+    }
+
+    // Load existing phone numbers once for fast duplicate lookup.
+    const [existingRows] = await pool.query("SELECT phone FROM service_calls");
+    const existingPhones = new Set(existingRows.map((r) => String(r.phone).replace(/\D/g, "")));
+
+    let inserted = 0, skipped = 0, duplicates = 0, invalidPhone = 0;
+
+    for (const b of rows) {
+      const name = String(b.name || "").trim();
+      const digitsOnly = String(b.phone || "").replace(/\D/g, "");
+
+      // require a name and a phone
+      if (!name || !digitsOnly) { skipped++; continue; }
+      // validate phone length (10-15 digits); phone column is VARCHAR(20)
+      if (digitsOnly.length < 10 || digitsOnly.length > 15) { invalidPhone++; continue; }
+      // reject duplicates (already in DB or repeated within this batch)
+      if (existingPhones.has(digitsOnly)) { duplicates++; continue; }
+      existingPhones.add(digitsOnly);
+
+      // ORIGINAL (bug: exact, case-sensitive match - a sheet value like
+      // "interior designer" or "INTERIOR DESIGNER" did not match the canonical
+      // "Interior Designer" and was silently blanked):
+      //   const rawCat = String(b.category || "").trim();
+      //   const category = SERVICE_CATEGORIES.includes(rawCat) ? rawCat : "";
+      // FIXED: match categories case-insensitively (ignoring surrounding spaces)
+      // and store the canonical casing from SERVICE_CATEGORIES. If the value is a
+      // custom category not in the list, keep the raw value as-is (the column is
+      // VARCHAR, not ENUM) instead of dropping it - nothing from the sheet is lost.
+      const rawCat = String(b.category || "").trim();
+      const canonical = SERVICE_CATEGORIES.find(
+        (c) => c.toLowerCase() === rawCat.toLowerCase()
+      );
+      const category = canonical || rawCat;
+
+      await pool.query(
+        `INSERT INTO service_calls (name, phone, category, location, remarks, city, experience, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          name,
+          digitsOnly,
+          category,
+          String(b.location || "").trim(),
+          String(b.remarks || "").trim(),
+          String(b.city || "").trim(),
+          String(b.experience || "").trim(),
+          req.user.id,
+        ]
+      );
+      inserted++;
+    }
+
+    const dupNote = duplicates > 0 ? `, rejected ${duplicates} duplicate(s) already in the database` : "";
+    const invNote = invalidPhone > 0 ? `, rejected ${invalidPhone} row(s) with invalid phone numbers` : "";
+    res.json({
+      message: `Imported ${inserted} service call(s), skipped ${skipped}${dupNote}${invNote}`,
+      inserted, skipped, duplicates, invalidPhone,
+    });
+  } catch (err) {
+    console.error("Service call import error:", err);
+    res.status(500).json({ error: "Failed to import service calls" });
   }
 });
 

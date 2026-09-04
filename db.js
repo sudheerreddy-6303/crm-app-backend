@@ -93,12 +93,35 @@ async function initDb() {
         category VARCHAR(50) DEFAULT '',
         location VARCHAR(200) DEFAULT '',
         remarks TEXT,
+        city VARCHAR(100) DEFAULT '',
+        experience VARCHAR(100) DEFAULT '',
         created_by INT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       )
     `);
+
+    // ADDED: migrations for existing service_calls databases. CREATE TABLE IF NOT
+    // EXISTS above only runs on fresh installs, so on an already-deployed database
+    // we add the new city / experience columns if they are missing. These back the
+    // Excel import (Fullname, Mobile number, city, location, experience, category).
+    // Safe to run on every startup - runs the ALTER only when the column is absent.
+    const serviceCallCols = [
+      ["city", "VARCHAR(100) DEFAULT '' AFTER remarks"],
+      ["experience", "VARCHAR(100) DEFAULT '' AFTER city"],
+    ];
+    for (const [col, def] of serviceCallCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'service_calls' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to service_calls table`);
+        await conn.query(`ALTER TABLE service_calls ADD COLUMN ${col} ${def}`);
+      }
+    }
 
     // ADDED: Walk-ins table - records customers who walk in to an experience
     // centre. purpose is VARCHAR (not ENUM) so new purposes can be added later
