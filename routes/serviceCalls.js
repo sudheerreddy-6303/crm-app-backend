@@ -59,6 +59,33 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ADDED: GET /api/service-calls/stats  - count of service calls per category
+// (whole table, not paginated) for the category cards on the Service Calls page.
+// Returns every category in SERVICE_CATEGORIES (0 if none), plus any custom
+// categories that came in from Excel imports, plus "Uncategorized" for blanks.
+router.get("/stats", async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT COALESCE(NULLIF(TRIM(category), ''), 'Uncategorized') AS category, COUNT(*) AS count
+       FROM service_calls
+       GROUP BY COALESCE(NULLIF(TRIM(category), ''), 'Uncategorized')`
+    );
+    const map = new Map();
+    SERVICE_CATEGORIES.forEach((c) => map.set(c, 0));
+    let total = 0;
+    rows.forEach((r) => {
+      const n = Number(r.count) || 0;
+      total += n;
+      map.set(r.category, (map.get(r.category) || 0) + n);
+    });
+    const categories = [...map.entries()].map(([category, count]) => ({ category, count }));
+    res.json({ total, categories });
+  } catch (err) {
+    console.error("Service calls stats error:", err);
+    res.status(500).json({ error: "Failed to load service call stats" });
+  }
+});
+
 // POST /api/service-calls  - create a service call
 router.post("/", async (req, res) => {
   try {
