@@ -49,7 +49,10 @@ router.get("/", async (req, res) => {
          SUM(call_category = '' OR call_category IS NULL) AS fresh,
          SUM(quote_sent = 'Yes') AS quotes_sent,
          SUM(order_booked = 'Yes') AS orders_booked,
-         SUM(next_call_date = CURDATE()) AS due_today
+         SUM(next_call_date = CURDATE()) AS due_today,
+         -- ADDED: "Leads" card - a record counts as a lead when the telecaller
+         -- marked priority warm/cold OR category INTERESTED OR quotation sent Yes
+         SUM(priority IN ('warm','cold') OR call_category = 'INTERESTED' OR quote_sent = 'Yes') AS leads
        FROM leads l ${scope}`,
       params
     );
