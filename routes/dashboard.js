@@ -114,6 +114,13 @@ router.get("/", async (req, res) => {
       );
       walkins = wk.c;
 
+      // ADDED: every walk-in also counts as a lead on the green "Leads" card.
+      // Read-only: walk-ins are NOT copied or changed - only counted here.
+      // leads_from_calls keeps the original number for reference.
+      totals[0].leads_from_calls = Number(totals[0].leads || 0);
+      totals[0].leads_from_walkins = Number(walkins || 0);
+      totals[0].leads = totals[0].leads_from_calls + totals[0].leads_from_walkins;
+
       // ADDED: count of projects (admin only). Counts the distinct project
       // names that appear on leads - the same set shown in the Project filter
       // dropdown (GET /dashboard/projects) - so the card matches that list.
@@ -146,6 +153,31 @@ router.get("/", async (req, res) => {
     );
 
     res.json({ totals: totals[0], performance, unassigned, walkins, projects_count: projectsCount, followups });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: GET /api/dashboard/walkin-leads - read-only list of walk-ins shown
+// under the leads when the dashboard "Leads" card is opened (admin only, same
+// as the Walk-ins card). Optional ?project= matches the project-filtered card.
+// This only READS the walkins table; nothing in walk-ins is changed.
+router.get("/walkin-leads", async (req, res) => {
+  try {
+    if (req.user.role !== "admin") return res.json({ walkins: [] });
+    const project = String(req.query.project || "").trim();
+    const where = project ? "WHERE w.project_name = ?" : "";
+    // UPDATED: returns the same fields as the Walk-ins page (w.* + added by)
+    // so the list under "Leads" displays exactly like the Walk-ins page
+    const [rows] = await pool.query(
+      `SELECT w.*, u.name AS created_by_name
+       FROM walkins w LEFT JOIN users u ON u.id = w.created_by
+       ${where}
+       ORDER BY w.created_at DESC`,
+      project ? [project] : []
+    );
+    res.json({ walkins: rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

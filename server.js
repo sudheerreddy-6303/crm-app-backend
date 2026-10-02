@@ -13,6 +13,8 @@ const serviceCallRoutes = require("./routes/serviceCalls");
 const walkinRoutes = require("./routes/walkins");
 // ADDED: Project Details module
 const projectRoutes = require("./routes/projects");
+// ADDED: Business Associates & Franchise module
+const businessPartnerRoutes = require("./routes/businessPartners");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -57,6 +59,8 @@ app.use("/api/service-calls", serviceCallRoutes);
 app.use("/api/walkins", walkinRoutes);
 // ADDED: Project Details module
 app.use("/api/projects", projectRoutes);
+// ADDED: Business Associates & Franchise module
+app.use("/api/business-partners", businessPartnerRoutes);
 
 const PORT = process.env.PORT || 5000;
 

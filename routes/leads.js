@@ -93,28 +93,54 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST /api/leads  (admin only)
-router.post("/", adminOnly, async (req, res) => {
+// ORIGINAL: POST /api/leads  (admin only)
+// ORIGINAL: router.post("/", adminOnly, async (req, res) => {
+// UPDATED: telecallers can now add a single lead too. A lead added by a
+// telecaller is always assigned to that telecaller (so it shows in their list).
+router.post("/", async (req, res) => {
   try {
     const b = req.body;
     if (!b.name || !b.primary_phone) {
       return res.status(400).json({ error: "Name and primary phone are required" });
     }
+    const isAdmin = req.user.role === "admin";
+    // ADDED: telecaller-added leads are assigned to themselves; admin chooses
+    const assignedTo = isAdmin ? (b.assigned_to || null) : req.user.id;
+    // ADDED: for telecallers, block a phone number that already exists, so a
+    // telecaller cannot create a duplicate of a lead belonging to someone else
+    if (!isAdmin) {
+      const phoneDigits = String(b.primary_phone).replace(/\D/g, "");
+      const [dup] = await pool.query(
+        "SELECT id FROM leads WHERE primary_phone = ? OR primary_phone = ? LIMIT 1",
+        [String(b.primary_phone).trim(), phoneDigits]
+      );
+      if (dup.length > 0) {
+        return res.status(409).json({ error: "A lead with this phone number already exists" });
+      }
+    }
     const [result] = await pool.query(
       `INSERT INTO leads
        (name, project_name, primary_phone, assigned_to, first_calling_date, second_calling_date,
         call_category, quote_sent, order_booked, whatsapp_sent_date, whatsapp_category,
-        calling_remark, next_call_date, priority, source, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        calling_remark, next_call_date, priority, source, created_by,
+        call_remark_1, call_remark_2, call_remark_3,
+        whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         // ADDED: project_name (optional here; mandatory only during Excel import)
-        b.name, b.project_name || "", b.primary_phone, b.assigned_to || null,
+        // ORIGINAL: b.name, b.project_name || "", b.primary_phone, b.assigned_to || null,
+        b.name, b.project_name || "", b.primary_phone, assignedTo,
         dateOrNull(b.first_calling_date), dateOrNull(b.second_calling_date),
         clean(b.call_category, CALL_CATEGORIES), clean(b.quote_sent, YES_NO),
         clean(b.order_booked, YES_NO), dateOrNull(b.whatsapp_sent_date),
         b.whatsapp_category || "", b.calling_remark || "",
         dateOrNull(b.next_call_date), clean(b.priority, PRIORITIES, "none"),
-        b.source || "", req.user.id,
+        // ORIGINAL: b.source || "", req.user.id,
+        // UPDATED: telecaller-added leads get source "Telecaller" if left empty
+        b.source || (isAdmin ? "" : "Telecaller"), req.user.id,
+        // ADDED: 3 call remarks + 3 WhatsApp sent Yes/No
+        b.call_remark_1 || "", b.call_remark_2 || "", b.call_remark_3 || "",
+        clean(b.whatsapp_sent_1, YES_NO), clean(b.whatsapp_sent_2, YES_NO), clean(b.whatsapp_sent_3, YES_NO),
       ]
     );
     res.status(201).json({ id: result.insertId, message: "Lead created" });
@@ -153,6 +179,13 @@ router.put("/:id", async (req, res) => {
     if ("calling_remark" in b) push("calling_remark", b.calling_remark || "");
     if ("next_call_date" in b) push("next_call_date", dateOrNull(b.next_call_date));
     if ("priority" in b) push("priority", clean(b.priority, PRIORITIES, "none"));
+    // ADDED: 3 call remarks + 3 WhatsApp sent Yes/No (admin + assigned telecaller)
+    if ("call_remark_1" in b) push("call_remark_1", b.call_remark_1 || "");
+    if ("call_remark_2" in b) push("call_remark_2", b.call_remark_2 || "");
+    if ("call_remark_3" in b) push("call_remark_3", b.call_remark_3 || "");
+    if ("whatsapp_sent_1" in b) push("whatsapp_sent_1", clean(b.whatsapp_sent_1, YES_NO));
+    if ("whatsapp_sent_2" in b) push("whatsapp_sent_2", clean(b.whatsapp_sent_2, YES_NO));
+    if ("whatsapp_sent_3" in b) push("whatsapp_sent_3", clean(b.whatsapp_sent_3, YES_NO));
 
     // Admin-only fields
     if (isAdmin) {

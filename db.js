@@ -82,6 +82,30 @@ async function initDb() {
       await conn.query("ALTER TABLE leads ADD COLUMN project_name VARCHAR(150) DEFAULT '' AFTER name");
     }
 
+    // ADDED: 3 call remarks (Call 1 / Call 2 / Call 3) and 3 WhatsApp sent
+    // Yes/No flags (WhatsApp 1 / 2 / 3) on each lead. Added as a migration so
+    // existing databases get the new columns automatically on next startup.
+    // The existing calling_remark / whatsapp_* columns are kept unchanged.
+    const leadExtraCols = [
+      ["call_remark_1", "TEXT"],
+      ["call_remark_2", "TEXT"],
+      ["call_remark_3", "TEXT"],
+      ["whatsapp_sent_1", "VARCHAR(3) DEFAULT ''"],
+      ["whatsapp_sent_2", "VARCHAR(3) DEFAULT ''"],
+      ["whatsapp_sent_3", "VARCHAR(3) DEFAULT ''"],
+    ];
+    for (const [col, def] of leadExtraCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'leads' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to leads table`);
+        await conn.query(`ALTER TABLE leads ADD COLUMN ${col} ${def}`);
+      }
+    }
+
     // ADDED: Service Calls table (name, phone, category dropdown, location, remarks)
     // category is VARCHAR (not ENUM) so new categories can be added later
     // without a database migration
@@ -194,6 +218,28 @@ async function initDb() {
         last_calling_date DATE NULL,
         units_booked_interiors INT DEFAULT 0,
         units_sold INT DEFAULT 0,
+        created_by INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
+    // ADDED: Business Associates & Franchise table. category is VARCHAR (not
+    // ENUM) so new categories can be added later without a DB migration.
+    // Brand-new table: CREATE TABLE IF NOT EXISTS creates it automatically on
+    // the next backend start for existing deployments too - no manual SQL needed.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS business_partners (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        person_name VARCHAR(150) NOT NULL,
+        contact VARCHAR(20) NOT NULL,
+        business_name VARCHAR(200) DEFAULT '',
+        location VARCHAR(200) DEFAULT '',
+        whatsapp VARCHAR(20) DEFAULT '',
+        call_remark_1 TEXT,
+        call_remark_2 TEXT,
+        category VARCHAR(60) DEFAULT '',
         created_by INT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
