@@ -15,6 +15,9 @@ const PARTNER_CATEGORIES = [
   "Business Associates", "Builders", "Contractors", "Franchise Prospect",
 ];
 
+// ADDED: dates come as YYYY-MM-DD from the date inputs; empty -> NULL
+const dateOrNull = (v) => (v && /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v).slice(0, 10) : null);
+
 const readBody = (b) => ({
   person_name: String(b.person_name || "").trim(),
   contact: String(b.contact || "").trim(),
@@ -24,6 +27,12 @@ const readBody = (b) => ({
   call_remark_1: String(b.call_remark_1 || "").trim(),
   call_remark_2: String(b.call_remark_2 || "").trim(),
   category: String(b.category || "").trim(),
+  // ADDED: calling date + WhatsApp sent date
+  calling_date: dateOrNull(b.calling_date),
+  whatsapp_sent_date: dateOrNull(b.whatsapp_sent_date),
+  // ADDED: 2nd call date + 2nd WhatsApp sent date
+  calling_date_2: dateOrNull(b.calling_date_2),
+  whatsapp_sent_date_2: dateOrNull(b.whatsapp_sent_date_2),
 });
 
 const validate = (d) => {
@@ -56,7 +65,13 @@ router.get("/", async (req, res) => {
       `SELECT COUNT(*) AS total FROM business_partners b ${whereSql}`, params
     );
     const [rows] = await pool.query(
-      `SELECT b.*, u.name AS created_by_name
+      // UPDATED: dates returned as plain 'YYYY-MM-DD' text so they never shift
+      // by a day because of the server's timezone
+      `SELECT b.*, u.name AS created_by_name,
+              DATE_FORMAT(b.calling_date, '%Y-%m-%d') AS calling_date,
+              DATE_FORMAT(b.whatsapp_sent_date, '%Y-%m-%d') AS whatsapp_sent_date,
+              DATE_FORMAT(b.calling_date_2, '%Y-%m-%d') AS calling_date_2,
+              DATE_FORMAT(b.whatsapp_sent_date_2, '%Y-%m-%d') AS whatsapp_sent_date_2
        FROM business_partners b LEFT JOIN users u ON u.id = b.created_by
        ${whereSql}
        ORDER BY b.created_at DESC
@@ -80,10 +95,15 @@ router.post("/", async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO business_partners
-       (person_name, contact, business_name, location, whatsapp, call_remark_1, call_remark_2, category, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (person_name, contact, business_name, location, whatsapp, call_remark_1, call_remark_2, category, created_by,
+        calling_date, whatsapp_sent_date, calling_date_2, whatsapp_sent_date_2)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [d.person_name, d.contact, d.business_name, d.location, d.whatsapp,
-       d.call_remark_1, d.call_remark_2, d.category, req.user.id]
+       d.call_remark_1, d.call_remark_2, d.category, req.user.id,
+       // ADDED: calling date + WhatsApp sent date
+       d.calling_date, d.whatsapp_sent_date,
+       // ADDED: 2nd call date + 2nd WhatsApp sent date
+       d.calling_date_2, d.whatsapp_sent_date_2]
     );
     res.status(201).json({ id: result.insertId, message: "Record added" });
   } catch (err) {
@@ -101,10 +121,16 @@ router.put("/:id", async (req, res) => {
 
     const [result] = await pool.query(
       `UPDATE business_partners SET person_name = ?, contact = ?, business_name = ?, location = ?,
-       whatsapp = ?, call_remark_1 = ?, call_remark_2 = ?, category = ?
+       whatsapp = ?, call_remark_1 = ?, call_remark_2 = ?, category = ?,
+       calling_date = ?, whatsapp_sent_date = ?,
+       calling_date_2 = ?, whatsapp_sent_date_2 = ?
        WHERE id = ?`,
       [d.person_name, d.contact, d.business_name, d.location, d.whatsapp,
-       d.call_remark_1, d.call_remark_2, d.category, req.params.id]
+       d.call_remark_1, d.call_remark_2, d.category,
+       // ADDED: calling date + WhatsApp sent date
+       d.calling_date, d.whatsapp_sent_date,
+       // ADDED: 2nd call date + 2nd WhatsApp sent date
+       d.calling_date_2, d.whatsapp_sent_date_2, req.params.id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: "Record not found" });
     res.json({ message: "Record updated" });

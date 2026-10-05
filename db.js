@@ -247,6 +247,28 @@ async function initDb() {
       )
     `);
 
+    // ADDED: calling date + WhatsApp sent date for Business Associates &
+    // Franchise. Migration so databases where the table already exists get
+    // the new columns on next startup. Safe to run on every startup.
+    const partnerCols = [
+      ["calling_date", "DATE NULL AFTER whatsapp"],
+      ["whatsapp_sent_date", "DATE NULL AFTER calling_date"],
+      // ADDED: 2nd call date + 2nd WhatsApp sent date
+      ["calling_date_2", "DATE NULL AFTER whatsapp_sent_date"],
+      ["whatsapp_sent_date_2", "DATE NULL AFTER calling_date_2"],
+    ];
+    for (const [col, def] of partnerCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'business_partners' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to business_partners table`);
+        await conn.query(`ALTER TABLE business_partners ADD COLUMN ${col} ${def}`);
+      }
+    }
+
     // Seed admin from env variables (never hardcode credentials in code)
     const adminEmail = process.env.ADMIN_EMAIL || "admin@telecrm.local";
     const adminPassword = process.env.ADMIN_PASSWORD || "ChangeMe@123";
