@@ -126,6 +126,62 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// ADDED: POST /api/walkins/:id/convert  - convert a walk-in into a lead.
+// Creates a new row in the leads table (Data page) from the walk-in details and
+// marks the walk-in as converted. The walk-in record is KEPT (not deleted).
+// Admin can pick the telecaller ({ assigned_to }); a telecaller's conversion is
+// assigned to themselves. Blocks a second conversion and duplicate phone numbers.
+router.post("/:id/convert", async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT *, DATE_FORMAT(visit_date, '%Y-%m-%d') AS visit_str FROM walkins WHERE id = ?",
+      [req.params.id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: "Walk-in not found" });
+    const w = rows[0];
+    if (w.converted_lead_id) {
+      return res.status(400).json({ error: "This walk-in is already converted to a lead" });
+    }
+
+    const phoneDigits = String(w.phone || "").replace(/\D/g, "");
+    const [dup] = await pool.query(
+      "SELECT id FROM leads WHERE primary_phone = ? OR primary_phone = ? LIMIT 1",
+      [String(w.phone || "").trim(), phoneDigits]
+    );
+    if (dup.length > 0) {
+      return res.status(409).json({ error: "A lead with this phone number already exists in Data" });
+    }
+
+    const isAdmin = req.user.role === "admin";
+    const assignedTo = isAdmin ? (req.body.assigned_to || null) : req.user.id;
+
+    // Walk-in details are copied into the lead's calling remark so nothing is lost
+    const visit = w.visit_str || "";
+    const parts = [
+      visit && `Walk-in on ${visit}`,
+      w.purpose && `Purpose: ${w.purpose}`,
+      w.budget && `Budget: ${w.budget}`,
+      w.location && `Centre: ${w.location}`,
+      (w.site_location || w.city) && `Location: ${[w.site_location, w.city].filter(Boolean).join(", ")}`,
+      w.alt_phone && `Alt mobile: ${w.alt_phone}`,
+      w.attended_by && `Attended by: ${w.attended_by}`,
+      w.remarks && `Remarks: ${w.remarks}`,
+    ].filter(Boolean);
+
+    const [result] = await pool.query(
+      `INSERT INTO leads (name, project_name, primary_phone, assigned_to, calling_remark, priority, source, created_by)
+       VALUES (?, ?, ?, ?, ?, 'none', 'Walk-in', ?)`,
+      [w.name, w.project_name || "", String(w.phone).trim(), assignedTo, parts.join(" | "), req.user.id]
+    );
+    await pool.query("UPDATE walkins SET converted_lead_id = ? WHERE id = ?", [result.insertId, w.id]);
+
+    res.status(201).json({ id: result.insertId, message: `"${w.name}" converted to a lead` });
+  } catch (err) {
+    console.error("Walk-in convert error:", err);
+    res.status(500).json({ error: "Failed to convert walk-in" });
+  }
+});
+
 // DELETE /api/walkins/:id  - admin only
 router.delete("/:id", adminOnly, async (req, res) => {
   try {

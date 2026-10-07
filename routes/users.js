@@ -184,7 +184,10 @@ router.get("/:id/activity", adminOnly, async (req, res) => {
               call_category, quote_sent, order_booked, whatsapp_sent_date,
               whatsapp_category, calling_remark, next_call_date, priority, updated_at,
               call_remark_1, call_remark_2, call_remark_3,
-              whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3
+              whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3,
+              DATE_FORMAT(whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,
+              DATE_FORMAT(whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2,
+              DATE_FORMAT(whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3
        FROM leads WHERE ${leadConds.join(" AND ")} ORDER BY updated_at DESC`,
       // ADDED above: 3 call remarks + 3 WhatsApp sent Yes/No columns
       leadParams

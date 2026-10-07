@@ -93,6 +93,16 @@ async function initDb() {
       ["whatsapp_sent_1", "VARCHAR(3) DEFAULT ''"],
       ["whatsapp_sent_2", "VARCHAR(3) DEFAULT ''"],
       ["whatsapp_sent_3", "VARCHAR(3) DEFAULT ''"],
+      // ADDED: project type (2BHK / 3BHK / 4BHK / Villa / Commercial / Others)
+      ["project_type", "VARCHAR(30) DEFAULT ''"],
+      // ADDED: WhatsApp 1 / 2 / 3 sent DATES (replace the Yes/No in the form).
+      // The old whatsapp_sent_1..3 Yes/No columns are kept, nothing removed.
+      ["whatsapp_date_1", "DATE NULL"],
+      ["whatsapp_date_2", "DATE NULL"],
+      ["whatsapp_date_3", "DATE NULL"],
+      // ADDED: Walk-in Yes / No. "Yes" makes the lead count in the dashboard
+      // "Leads" card and show when that card is opened.
+      ["walkin", "VARCHAR(3) DEFAULT ''"],
     ];
     for (const [col, def] of leadExtraCols) {
       const [exists] = await conn.query(
@@ -182,6 +192,9 @@ async function initDb() {
       ["site_location", "VARCHAR(200) DEFAULT '' AFTER location"],
       ["city", "VARCHAR(100) DEFAULT '' AFTER site_location"],
       ["address", "TEXT AFTER city"],
+      // ADDED: id of the lead created when this walk-in was converted to a lead
+      // (NULL = not converted yet). The walk-in itself is never deleted.
+      ["converted_lead_id", "INT NULL"],
     ];
     for (const [col, def] of walkinCols) {
       const [exists] = await conn.query(

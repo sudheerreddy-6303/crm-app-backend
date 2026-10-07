@@ -8,6 +8,8 @@ router.use(auth);
 const CALL_CATEGORIES = ["", "NOT INTERESTED", "FOLLOW UP", "INTERESTED", "NOT ANSWERED"];
 const YES_NO = ["", "Yes", "No"];
 const PRIORITIES = ["none", "hot", "warm", "cold"];
+// ADDED: allowed project types for the lead form dropdown
+const PROJECT_TYPES = ["", "2BHK", "3BHK", "4BHK", "Villa", "Commercial", "Others"];
 
 const clean = (v, allowed, fallback = "") => (allowed.includes(v) ? v : fallback);
 const dateOrNull = (v) => (v && /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v).slice(0, 10) : null);
@@ -46,7 +48,9 @@ router.get("/", async (req, res) => {
     if (due === "today") where.push("l.next_call_date = CURDATE()");
     // ADDED: stage=leads filter for the "Leads" dashboard card - priority
     // warm/cold OR category INTERESTED OR quotation sent Yes (same as the card count)
-    if (stage === "leads") where.push("(l.priority IN ('warm','cold') OR l.call_category = 'INTERESTED' OR l.quote_sent = 'Yes')");
+    // ORIGINAL: if (stage === "leads") where.push("(l.priority IN ('warm','cold') OR l.call_category = 'INTERESTED' OR l.quote_sent = 'Yes')");
+    // UPDATED: also include leads marked Walk-in = Yes
+    if (stage === "leads") where.push("(l.priority IN ('warm','cold') OR l.call_category = 'INTERESTED' OR l.quote_sent = 'Yes' OR l.walkin = 'Yes')");
     // ADDED: project filter - lets the project-filtered dashboard cards drill
     // down into the matching leads (leads link to a project by project_name)
     if (project) { where.push("l.project_name = ?"); params.push(project); }
@@ -59,7 +63,11 @@ router.get("/", async (req, res) => {
       `SELECT COUNT(*) AS total FROM leads l ${whereSql}`, params
     );
     const [rows] = await pool.query(
-      `SELECT l.*, u.name AS caller_name
+      // UPDATED: WhatsApp 1/2/3 dates returned as plain 'YYYY-MM-DD' text
+      `SELECT l.*, u.name AS caller_name,
+              DATE_FORMAT(l.whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,
+              DATE_FORMAT(l.whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2,
+              DATE_FORMAT(l.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3
        FROM leads l LEFT JOIN users u ON u.id = l.assigned_to
        ${whereSql}
        ORDER BY l.updated_at DESC
@@ -77,7 +85,11 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT l.*, u.name AS caller_name FROM leads l
+      `SELECT l.*, u.name AS caller_name,
+              DATE_FORMAT(l.whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,
+              DATE_FORMAT(l.whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2,
+              DATE_FORMAT(l.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3
+       FROM leads l
        LEFT JOIN users u ON u.id = l.assigned_to WHERE l.id = ?`,
       [req.params.id]
     );
@@ -124,8 +136,9 @@ router.post("/", async (req, res) => {
         call_category, quote_sent, order_booked, whatsapp_sent_date, whatsapp_category,
         calling_remark, next_call_date, priority, source, created_by,
         call_remark_1, call_remark_2, call_remark_3,
-        whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3, project_type,
+        whatsapp_date_1, whatsapp_date_2, whatsapp_date_3, walkin)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         // ADDED: project_name (optional here; mandatory only during Excel import)
         // ORIGINAL: b.name, b.project_name || "", b.primary_phone, b.assigned_to || null,
@@ -141,6 +154,12 @@ router.post("/", async (req, res) => {
         // ADDED: 3 call remarks + 3 WhatsApp sent Yes/No
         b.call_remark_1 || "", b.call_remark_2 || "", b.call_remark_3 || "",
         clean(b.whatsapp_sent_1, YES_NO), clean(b.whatsapp_sent_2, YES_NO), clean(b.whatsapp_sent_3, YES_NO),
+        // ADDED: project type
+        clean(b.project_type, PROJECT_TYPES),
+        // ADDED: WhatsApp 1 / 2 / 3 sent dates
+        dateOrNull(b.whatsapp_date_1), dateOrNull(b.whatsapp_date_2), dateOrNull(b.whatsapp_date_3),
+        // ADDED: Walk-in Yes / No
+        clean(b.walkin, YES_NO),
       ]
     );
     res.status(201).json({ id: result.insertId, message: "Lead created" });
@@ -186,6 +205,14 @@ router.put("/:id", async (req, res) => {
     if ("whatsapp_sent_1" in b) push("whatsapp_sent_1", clean(b.whatsapp_sent_1, YES_NO));
     if ("whatsapp_sent_2" in b) push("whatsapp_sent_2", clean(b.whatsapp_sent_2, YES_NO));
     if ("whatsapp_sent_3" in b) push("whatsapp_sent_3", clean(b.whatsapp_sent_3, YES_NO));
+    // ADDED: project type (admin + assigned telecaller)
+    if ("project_type" in b) push("project_type", clean(b.project_type, PROJECT_TYPES));
+    // ADDED: WhatsApp 1 / 2 / 3 sent dates (admin + assigned telecaller)
+    if ("whatsapp_date_1" in b) push("whatsapp_date_1", dateOrNull(b.whatsapp_date_1));
+    if ("whatsapp_date_2" in b) push("whatsapp_date_2", dateOrNull(b.whatsapp_date_2));
+    if ("whatsapp_date_3" in b) push("whatsapp_date_3", dateOrNull(b.whatsapp_date_3));
+    // ADDED: Walk-in Yes / No (admin + assigned telecaller)
+    if ("walkin" in b) push("walkin", clean(b.walkin, YES_NO));
 
     // Admin-only fields
     if (isAdmin) {
