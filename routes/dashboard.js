@@ -10,7 +10,15 @@ router.use(auth);
 // all totals, telecaller performance, and follow-ups reflect only that period.
 router.get("/", async (req, res) => {
   try {
-    const isAdmin = req.user.role === "admin";
+    // ORIGINAL: const isAdmin = req.user.role === "admin";
+    // UPDATED: admin may pass ?as_user=<telecallerId> to get exactly the
+    // dashboard that telecaller sees (their own leads only). Used by the
+    // telecaller detail page. Ignored for non-admins, so a telecaller can
+    // never see anyone else's data. Without as_user nothing changes.
+    let isAdmin = req.user.role === "admin";
+    let scopeUserId = req.user.id;
+    const asUser = isAdmin && /^\d+$/.test(String(req.query.as_user || "")) ? Number(req.query.as_user) : null;
+    if (asUser) { isAdmin = false; scopeUserId = asUser; }
 
     const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v || ""));
     const from = isDate(req.query.from) ? req.query.from : null;
@@ -33,7 +41,8 @@ router.get("/", async (req, res) => {
     // EXTENDED with the optional range condition
     const conds = [];
     const params = [];
-    if (!isAdmin) { conds.push("l.assigned_to = ?"); params.push(req.user.id); }
+    // ORIGINAL: params.push(req.user.id) - UPDATED: scopeUserId (same value unless as_user)
+    if (!isAdmin) { conds.push("l.assigned_to = ?"); params.push(scopeUserId); }
     if (rangeActive) { conds.push(rangeSql); params.push(...rangeParams); }
     // ADDED: project filter for the top KPI cards
     if (projectActive) { conds.push("l.project_name = ?"); params.push(project); }
@@ -53,7 +62,10 @@ router.get("/", async (req, res) => {
          -- ADDED: "Leads" card - a record counts as a lead when the telecaller
          -- marked priority warm/cold OR category INTERESTED OR quotation sent Yes
          -- UPDATED: also counts leads marked Walk-in = Yes
-         SUM(priority IN ('warm','cold') OR call_category = 'INTERESTED' OR quote_sent = 'Yes' OR walkin = 'Yes') AS leads
+         SUM(priority IN ('warm','cold') OR call_category = 'INTERESTED' OR quote_sent = 'Yes' OR walkin = 'Yes') AS leads,
+         -- ADDED: leads marked Walk-in = Yes (shown as the "Walk-ins" card on
+         -- a telecaller's dashboard - scoped to their own leads like the rest)
+         SUM(walkin = 'Yes') AS walkin_leads
        FROM leads l ${scope}`,
       params
     );
@@ -136,7 +148,8 @@ router.get("/", async (req, res) => {
     // shows follow-ups whose next call date falls inside the range instead.
     const fuConds = [];
     const fuParams = [];
-    if (!isAdmin) { fuConds.push("l.assigned_to = ?"); fuParams.push(req.user.id); }
+    // ORIGINAL: fuParams.push(req.user.id) - UPDATED: scopeUserId (same value unless as_user)
+    if (!isAdmin) { fuConds.push("l.assigned_to = ?"); fuParams.push(scopeUserId); }
     if (rangeActive) {
       fuConds.push("l.next_call_date BETWEEN ? AND ?");
       fuParams.push(lo, hi);
@@ -239,6 +252,25 @@ router.get("/project-summary", async (req, res) => {
        ORDER BY total_leads DESC, project_name ASC`,
       params
     );
+
+    // ADDED: walk-ins count per project for the project cards. Walk-ins are
+    // stored in the walkins table with their own project_name, so they are
+    // counted here (read-only) and attached to each project row by name.
+    // Quotations use the existing quotes_sent count above (quote_sent = 'Yes').
+    const [wkRows] = await pool.query(
+      `SELECT project_name, COUNT(*) AS c FROM walkins
+       WHERE project_name IS NOT NULL AND project_name <> ''
+       GROUP BY project_name`
+    );
+    const wkMap = {};
+    wkRows.forEach((w) => {
+      const key = String(w.project_name).trim().toLowerCase();
+      wkMap[key] = (wkMap[key] || 0) + Number(w.c || 0);
+    });
+    rows.forEach((r) => {
+      r.walkins = wkMap[String(r.name).trim().toLowerCase()] || 0;
+    });
+
     res.json({ projects: rows });
   } catch (err) {
     console.error(err);

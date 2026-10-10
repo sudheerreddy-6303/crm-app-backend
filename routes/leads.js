@@ -18,7 +18,8 @@ const dateOrNull = (v) => (v && /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v)
 router.get("/", async (req, res) => {
   try {
     const { search = "", category = "", assigned = "", quote = "", order = "", priority = "",
-            due = "", project = "", stage = "", page = 1, limit = 50 } = req.query;
+            due = "", project = "", stage = "", walkin = "", page = 1, limit = 50 } = req.query;
+    // ADDED: walkin filter (above) - used by the telecaller "Walk-ins" card
 
     const where = [];
     const params = [];
@@ -54,6 +55,8 @@ router.get("/", async (req, res) => {
     // ADDED: project filter - lets the project-filtered dashboard cards drill
     // down into the matching leads (leads link to a project by project_name)
     if (project) { where.push("l.project_name = ?"); params.push(project); }
+    // ADDED: walkin=Yes / No - leads marked Walk-in on the lead form
+    if (walkin === "Yes" || walkin === "No") { where.push("l.walkin = ?"); params.push(walkin); }
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const lim = Math.min(Number(limit) || 50, 200);

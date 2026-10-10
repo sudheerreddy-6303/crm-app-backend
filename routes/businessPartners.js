@@ -13,6 +13,8 @@ router.use(auth);
 // frontend/src/components/BusinessPartnerModal.jsx (PARTNER_CATEGORIES).
 const PARTNER_CATEGORIES = [
   "Business Associates", "Builders", "Contractors", "Franchise Prospect",
+  // ADDED: new category
+  "Sales",
 ];
 
 // ADDED: dates come as YYYY-MM-DD from the date inputs; empty -> NULL
