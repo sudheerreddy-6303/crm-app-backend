@@ -15,6 +15,8 @@ const walkinRoutes = require("./routes/walkins");
 const projectRoutes = require("./routes/projects");
 // ADDED: Business Associates & Franchise module
 const businessPartnerRoutes = require("./routes/businessPartners");
+// ADDED: notifications bell (admin replies to a telecaller's call remarks)
+const notificationRoutes = require("./routes/notifications");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -61,6 +63,8 @@ app.use("/api/walkins", walkinRoutes);
 app.use("/api/projects", projectRoutes);
 // ADDED: Business Associates & Franchise module
 app.use("/api/business-partners", businessPartnerRoutes);
+// ADDED: notifications bell
+app.use("/api/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 5000;
 

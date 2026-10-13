@@ -23,6 +23,8 @@ const dateOrNull = (v) => (v && /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v)
 const readBody = (b) => ({
   person_name: String(b.person_name || "").trim(),
   contact: String(b.contact || "").trim(),
+  // ADDED: owner's name
+  owner_name: String(b.owner_name || "").trim(),
   business_name: String(b.business_name || "").trim(),
   location: String(b.location || "").trim(),
   whatsapp: String(b.whatsapp || "").trim(),
@@ -39,6 +41,9 @@ const readBody = (b) => ({
 
 const validate = (d) => {
   if (!d.person_name || !d.contact) return "Person name and contact number are required";
+  // ADDED: business name and location are now required too
+  if (!d.business_name) return "Business name is required";
+  if (!d.location) return "Location is required";
   if (d.category && !PARTNER_CATEGORIES.includes(d.category)) return "Invalid category";
   return null;
 };
@@ -51,8 +56,10 @@ router.get("/", async (req, res) => {
     const where = [];
     const params = [];
     if (search) {
-      where.push("(b.person_name LIKE ? OR b.contact LIKE ? OR b.business_name LIKE ? OR b.location LIKE ? OR b.whatsapp LIKE ?)");
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+      // UPDATED: search also matches the owner's name
+      // ORIGINAL: where.push("(b.person_name LIKE ? OR b.contact LIKE ? OR b.business_name LIKE ? OR b.location LIKE ? OR b.whatsapp LIKE ?)");
+      where.push("(b.person_name LIKE ? OR b.contact LIKE ? OR b.business_name LIKE ? OR b.location LIKE ? OR b.whatsapp LIKE ? OR b.owner_name LIKE ?)");
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
     if (category) {
       where.push("b.category = ?");
@@ -98,14 +105,16 @@ router.post("/", async (req, res) => {
     const [result] = await pool.query(
       `INSERT INTO business_partners
        (person_name, contact, business_name, location, whatsapp, call_remark_1, call_remark_2, category, created_by,
-        calling_date, whatsapp_sent_date, calling_date_2, whatsapp_sent_date_2)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        calling_date, whatsapp_sent_date, calling_date_2, whatsapp_sent_date_2, owner_name)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [d.person_name, d.contact, d.business_name, d.location, d.whatsapp,
        d.call_remark_1, d.call_remark_2, d.category, req.user.id,
        // ADDED: calling date + WhatsApp sent date
        d.calling_date, d.whatsapp_sent_date,
        // ADDED: 2nd call date + 2nd WhatsApp sent date
-       d.calling_date_2, d.whatsapp_sent_date_2]
+       d.calling_date_2, d.whatsapp_sent_date_2,
+       // ADDED: owner's name
+       d.owner_name]
     );
     res.status(201).json({ id: result.insertId, message: "Record added" });
   } catch (err) {
@@ -125,14 +134,16 @@ router.put("/:id", async (req, res) => {
       `UPDATE business_partners SET person_name = ?, contact = ?, business_name = ?, location = ?,
        whatsapp = ?, call_remark_1 = ?, call_remark_2 = ?, category = ?,
        calling_date = ?, whatsapp_sent_date = ?,
-       calling_date_2 = ?, whatsapp_sent_date_2 = ?
+       calling_date_2 = ?, whatsapp_sent_date_2 = ?, owner_name = ?
        WHERE id = ?`,
       [d.person_name, d.contact, d.business_name, d.location, d.whatsapp,
        d.call_remark_1, d.call_remark_2, d.category,
        // ADDED: calling date + WhatsApp sent date
        d.calling_date, d.whatsapp_sent_date,
        // ADDED: 2nd call date + 2nd WhatsApp sent date
-       d.calling_date_2, d.whatsapp_sent_date_2, req.params.id]
+       d.calling_date_2, d.whatsapp_sent_date_2,
+       // ADDED: owner's name
+       d.owner_name, req.params.id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: "Record not found" });
     res.json({ message: "Record updated" });

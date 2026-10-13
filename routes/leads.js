@@ -13,6 +13,13 @@ const PROJECT_TYPES = ["", "2BHK", "3BHK", "4BHK", "Villa", "Commercial", "Other
 
 const clean = (v, allowed, fallback = "") => (allowed.includes(v) ? v : fallback);
 const dateOrNull = (v) => (v && /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v).slice(0, 10) : null);
+// ADDED: revenue booked amount - accepts "250000", "2,50,000", "₹ 2,50,000.50";
+// empty / invalid / negative -> NULL (not entered)
+const amountOrNull = (v) => {
+  if (/-/.test(String(v ?? ""))) return null; // negative amounts are not allowed
+  const n = parseFloat(String(v ?? "").replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : null;
+};
 
 // GET /api/leads  (admin: all; telecaller: only assigned) with filters + pagination
 router.get("/", async (req, res) => {
@@ -140,8 +147,8 @@ router.post("/", async (req, res) => {
         calling_remark, next_call_date, priority, source, created_by,
         call_remark_1, call_remark_2, call_remark_3,
         whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3, project_type,
-        whatsapp_date_1, whatsapp_date_2, whatsapp_date_3, walkin)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        whatsapp_date_1, whatsapp_date_2, whatsapp_date_3, walkin, revenue_booked)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         // ADDED: project_name (optional here; mandatory only during Excel import)
         // ORIGINAL: b.name, b.project_name || "", b.primary_phone, b.assigned_to || null,
@@ -163,6 +170,8 @@ router.post("/", async (req, res) => {
         dateOrNull(b.whatsapp_date_1), dateOrNull(b.whatsapp_date_2), dateOrNull(b.whatsapp_date_3),
         // ADDED: Walk-in Yes / No
         clean(b.walkin, YES_NO),
+        // ADDED: Revenue booked (amount)
+        amountOrNull(b.revenue_booked),
       ]
     );
     res.status(201).json({ id: result.insertId, message: "Lead created" });
@@ -216,6 +225,8 @@ router.put("/:id", async (req, res) => {
     if ("whatsapp_date_3" in b) push("whatsapp_date_3", dateOrNull(b.whatsapp_date_3));
     // ADDED: Walk-in Yes / No (admin + assigned telecaller)
     if ("walkin" in b) push("walkin", clean(b.walkin, YES_NO));
+    // ADDED: Revenue booked amount (admin + assigned telecaller)
+    if ("revenue_booked" in b) push("revenue_booked", amountOrNull(b.revenue_booked));
 
     // Admin-only fields
     if (isAdmin) {
@@ -396,7 +407,60 @@ router.get("/:id/logs", async (req, res) => {
        WHERE c.lead_id = ? ORDER BY c.log_date DESC`,
       [req.params.id]
     );
+    // ADDED: attach admin replies to each call log (oldest reply first).
+    // Response is still the same array of logs - each now has a "replies" list.
+    rows.forEach((r) => { r.replies = []; });
+    if (rows.length) {
+      const [reps] = await pool.query(
+        `SELECT rp.id, rp.log_id, rp.reply, rp.created_at, u.name AS user_name
+         FROM call_log_replies rp LEFT JOIN users u ON u.id = rp.user_id
+         WHERE rp.log_id IN (?) ORDER BY rp.created_at ASC, rp.id ASC`,
+        [rows.map((r) => r.id)]
+      );
+      const byLog = {};
+      rows.forEach((r) => { byLog[r.id] = r; });
+      reps.forEach((rp) => { if (byLog[rp.log_id]) byLog[rp.log_id].replies.push(rp); });
+    }
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: POST /api/leads/:id/logs/:logId/replies  (admin only)
+// Admin replies to a telecaller's call remark. The reply is shown under that
+// remark in the call history, which the assigned telecaller also sees.
+router.post("/:id/logs/:logId/replies", adminOnly, async (req, res) => {
+  try {
+    const reply = String((req.body && req.body.reply) || "").trim();
+    if (!reply) return res.status(400).json({ error: "Reply cannot be empty" });
+    if (reply.length > 2000) return res.status(400).json({ error: "Reply is too long (max 2000 characters)" });
+    const [logRows] = await pool.query(
+      "SELECT id FROM call_logs WHERE id = ? AND lead_id = ?", [req.params.logId, req.params.id]
+    );
+    if (logRows.length === 0) return res.status(404).json({ error: "Call remark not found" });
+    const [result] = await pool.query(
+      "INSERT INTO call_log_replies (log_id, user_id, reply) VALUES (?, ?, ?)",
+      [req.params.logId, req.user.id, reply]
+    );
+    res.status(201).json({ id: result.insertId, message: "Reply sent" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: DELETE /api/leads/:id/logs/:logId/replies/:replyId  (admin only)
+router.delete("/:id/logs/:logId/replies/:replyId", adminOnly, async (req, res) => {
+  try {
+    const [result] = await pool.query(
+      `DELETE rp FROM call_log_replies rp JOIN call_logs c ON c.id = rp.log_id
+       WHERE rp.id = ? AND rp.log_id = ? AND c.lead_id = ?`,
+      [req.params.replyId, req.params.logId, req.params.id]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ error: "Reply not found" });
+    res.json({ message: "Reply deleted" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

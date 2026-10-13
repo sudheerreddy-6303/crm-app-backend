@@ -103,6 +103,9 @@ async function initDb() {
       // ADDED: Walk-in Yes / No. "Yes" makes the lead count in the dashboard
       // "Leads" card and show when that card is opened.
       ["walkin", "VARCHAR(3) DEFAULT ''"],
+      // ADDED: Revenue booked (amount in rupees) - entered in the lead form
+      // (Follow up button). NULL = not entered. Existing leads are unchanged.
+      ["revenue_booked", "DECIMAL(14,2) NULL"],
     ];
     for (const [col, def] of leadExtraCols) {
       const [exists] = await conn.query(
@@ -269,6 +272,8 @@ async function initDb() {
       // ADDED: 2nd call date + 2nd WhatsApp sent date
       ["calling_date_2", "DATE NULL AFTER whatsapp_sent_date"],
       ["whatsapp_sent_date_2", "DATE NULL AFTER calling_date_2"],
+      // ADDED: owner's name (entered after the contact number in the form)
+      ["owner_name", "VARCHAR(150) DEFAULT '' AFTER contact"],
     ];
     for (const [col, def] of partnerCols) {
       const [exists] = await conn.query(
@@ -280,6 +285,35 @@ async function initDb() {
         console.log(`Migration: adding ${col} column to business_partners table`);
         await conn.query(`ALTER TABLE business_partners ADD COLUMN ${col} ${def}`);
       }
+    }
+
+    // ADDED: admin replies to telecaller call remarks (call history). One row
+    // per reply, linked to the call_logs entry it answers. Brand-new table -
+    // created automatically on the next backend start; existing data untouched.
+    // Deleting a call log (e.g. when its lead is deleted) removes its replies.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS call_log_replies (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        log_id INT NOT NULL,
+        user_id INT NULL,
+        reply TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        -- ADDED: when the telecaller read it in the notifications bell (NULL = unread)
+        read_at TIMESTAMP NULL,
+        FOREIGN KEY (log_id) REFERENCES call_logs(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
+    // ADDED: migration - read_at for call_log_replies created before the
+    // notifications bell existed. Safe to run on every startup.
+    const [readAtCol] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'call_log_replies' AND COLUMN_NAME = 'read_at'`
+    );
+    if (readAtCol[0].cnt === 0) {
+      console.log("Migration: adding read_at column to call_log_replies table");
+      await conn.query("ALTER TABLE call_log_replies ADD COLUMN read_at TIMESTAMP NULL");
     }
 
     // Seed admin from env variables (never hardcode credentials in code)

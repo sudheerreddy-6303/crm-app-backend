@@ -245,7 +245,9 @@ router.get("/project-summary", async (req, res) => {
          SUM(call_category = 'INTERESTED') AS interested,
          SUM(call_category = 'FOLLOW UP') AS follow_up,
          SUM(quote_sent = 'Yes') AS quotes_sent,
-         SUM(order_booked = 'Yes') AS orders_booked
+         SUM(order_booked = 'Yes') AS orders_booked,
+         -- ADDED: "Leads" per project - same rule as the dashboard "Leads" card
+         SUM(priority IN ('warm','cold') OR call_category = 'INTERESTED' OR quote_sent = 'Yes' OR walkin = 'Yes') AS leads
        FROM leads
        WHERE ${conds.join(" AND ")}
        GROUP BY project_name
@@ -269,6 +271,98 @@ router.get("/project-summary", async (req, res) => {
     });
     rows.forEach((r) => {
       r.walkins = wkMap[String(r.name).trim().toLowerCase()] || 0;
+      // ADDED: like the dashboard "Leads" card, the admin's count also includes
+      // that project's walk-ins (so it matches the dashboard filtered by project)
+      r.leads = Number(r.leads || 0) + (isAdmin ? Number(r.walkins || 0) : 0);
+    });
+
+    // ADDED: project type and location for each card, read from the Project
+    // Details records (projects table), matched by project name (ignoring
+    // capital letters / extra spaces). Read-only. Empty when the project has
+    // no Project Details record yet.
+    const [pjRows] = await pool.query(
+      // UPDATED: address added (used when Location is empty)
+      // ORIGINAL: SELECT project_name, type, location FROM projects
+      `SELECT project_name, type, location, address FROM projects
+       WHERE project_name IS NOT NULL AND project_name <> ''
+       ORDER BY updated_at DESC`
+    );
+    // UPDATED: names are matched ignoring capitals, spaces, dots, dashes etc.
+    // ("ABSL LOFT" = "absl-loft" = "Absl Loft.") so small spelling differences
+    // between the leads and Project Details still match.
+    // ORIGINAL key: String(name).trim().toLowerCase()
+    const nameKey = (v) => String(v || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const pjMap = {};
+    pjRows.forEach((pj) => {
+      const key = nameKey(pj.project_name);
+      if (key && !pjMap[key]) pjMap[key] = pj; // most recently updated record wins
+    });
+
+    // ADDED: fallback type from the leads themselves - the most common
+    // "Project type" (2BHK / 3BHK / Villa ...) entered on that project's leads.
+    // Used only when the project has no type in Project Details.
+    const [ltRows] = await pool.query(
+      `SELECT project_name, project_type, COUNT(*) AS c FROM leads
+       WHERE ${conds.join(" AND ")} AND project_type IS NOT NULL AND project_type <> ''
+       GROUP BY project_name, project_type`,
+      params
+    );
+    const leadTypeMap = {};
+    ltRows.forEach((t) => {
+      const key = nameKey(t.project_name);
+      if (!leadTypeMap[key] || Number(t.c) > leadTypeMap[key].c) leadTypeMap[key] = { type: t.project_type, c: Number(t.c) };
+    });
+
+    // ADDED: close-name matching for names spelled slightly differently in
+    // Project Details and on the leads, e.g. "Aparna Zenon" vs "Aparna xenon"
+    // (1 letter different) or "Oorjitha projects (vedant)" vs "Oorjitha".
+    // Exact matches always win; otherwise the closest name is used if it is
+    // at least 80% the same (or one name fully contains the other).
+    const editDistance = (a, b) => {
+      const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+      for (let j = 1; j <= b.length; j++) d[0][j] = j;
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        }
+      }
+      return d[a.length][b.length];
+    };
+    const pjKeys = Object.keys(pjMap);
+    const findProject = (key) => {
+      if (!key) return null;
+      if (pjMap[key]) return pjMap[key];
+      let best = null; let bestScore = 0;
+      pjKeys.forEach((k) => {
+        let score = 0;
+        const shorter = Math.min(k.length, key.length);
+        if (shorter >= 5 && (k.startsWith(key) || key.startsWith(k))) score = 0.95;
+        else if (shorter >= 5 && (k.includes(key) || key.includes(k))) score = 0.9;
+        else if (shorter >= 5) score = 1 - editDistance(k, key) / Math.max(k.length, key.length);
+        if (score > bestScore) { bestScore = score; best = pjMap[k]; }
+      });
+      return bestScore >= 0.8 ? best : null;
+    };
+    // ADDED: short area from the address when Location is empty - the part
+    // just before the city (e.g. "..., Tellapur, Telangana 500019" -> "Tellapur")
+    const areaFromAddress = (addr) => {
+      const parts = String(addr || "").split(",").map((x) => x.trim()).filter(Boolean)
+        .filter((x) => !/^(hyderabad|secunderabad|telangana|india|ts|tg)\b/i.test(x) && !/\d{6}/.test(x));
+      return parts.length ? parts[parts.length - 1] : "";
+    };
+
+    rows.forEach((r) => {
+      const key = nameKey(r.name);
+      // ORIGINAL: const pj = pjMap[key];
+      const pj = findProject(key);
+      r.type = (pj && pj.type) || (leadTypeMap[key] ? leadTypeMap[key].type : "");
+      // ADDED: where the type came from - "project" (Project Details) or "leads"
+      r.type_source = pj && pj.type ? "project" : (leadTypeMap[key] ? "leads" : "");
+      // ORIGINAL: r.location = pj ? pj.location || "" : "";
+      // UPDATED: Location, or the area from the Address when Location is empty
+      r.location = pj ? (pj.location || areaFromAddress(pj.address)) : "";
+      // ADDED: the Project Details name it was matched to (for checking)
+      r.matched_project = pj ? pj.project_name : "";
     });
 
     res.json({ projects: rows });
