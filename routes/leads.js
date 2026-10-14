@@ -77,8 +77,17 @@ router.get("/", async (req, res) => {
       `SELECT l.*, u.name AS caller_name,
               DATE_FORMAT(l.whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,
               DATE_FORMAT(l.whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2,
-              DATE_FORMAT(l.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3
+              DATE_FORMAT(l.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3,
+              -- ADDED: LAST call details = the latest call history entry of each lead
+              -- (exact moment as epoch seconds so the page shows correct India time)
+              UNIX_TIMESTAMP(lc.log_date) AS last_call_ts, lc.remark AS last_call_remark,
+              lc.category AS last_call_category, lcu.name AS last_call_by
        FROM leads l LEFT JOIN users u ON u.id = l.assigned_to
+       -- ADDED: latest call log per lead (+ who made it)
+       LEFT JOIN call_logs lc ON lc.id = (
+         SELECT c2.id FROM call_logs c2 WHERE c2.lead_id = l.id
+         ORDER BY c2.log_date DESC, c2.id DESC LIMIT 1)
+       LEFT JOIN users lcu ON lcu.id = lc.user_id
        ${whereSql}
        ORDER BY l.updated_at DESC
        LIMIT ? OFFSET ?`,

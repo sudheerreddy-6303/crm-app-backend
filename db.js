@@ -316,6 +316,30 @@ async function initDb() {
       await conn.query("ALTER TABLE call_log_replies ADD COLUMN read_at TIMESTAMP NULL");
     }
 
+    // ADDED: WhatsApp requests (Meta WhatsApp / Bulk WhatsApp pages). One row per
+    // "Continue" on the form: channel, telecaller, selected projects, count and
+    // sending date, plus who saved it and when. Brand-new table - created
+    // automatically on the next backend start; existing data untouched.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS whatsapp_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        channel VARCHAR(20) NOT NULL,
+        telecaller_id INT NULL,
+        telecaller_name VARCHAR(150) NOT NULL DEFAULT '',
+        projects TEXT NOT NULL,
+        project_count INT NOT NULL DEFAULT 0,
+        count INT NOT NULL,
+        send_date DATE NOT NULL,
+        created_by INT NULL,
+        created_by_name VARCHAR(150) NOT NULL DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_wa_channel (channel),
+        INDEX idx_wa_tc (telecaller_id),
+        FOREIGN KEY (telecaller_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
     // Seed admin from env variables (never hardcode credentials in code)
     const adminEmail = process.env.ADMIN_EMAIL || "admin@telecrm.local";
     const adminPassword = process.env.ADMIN_PASSWORD || "ChangeMe@123";

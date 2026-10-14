@@ -17,6 +17,8 @@ const projectRoutes = require("./routes/projects");
 const businessPartnerRoutes = require("./routes/businessPartners");
 // ADDED: notifications bell (admin replies to a telecaller's call remarks)
 const notificationRoutes = require("./routes/notifications");
+// ADDED: WhatsApp requests (Meta / Bulk WhatsApp form + history)
+const whatsappRoutes = require("./routes/whatsapp");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -65,6 +67,8 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/business-partners", businessPartnerRoutes);
 // ADDED: notifications bell
 app.use("/api/notifications", notificationRoutes);
+// ADDED: WhatsApp requests
+app.use("/api/whatsapp", whatsappRoutes);
 
 const PORT = process.env.PORT || 5000;
 
