@@ -106,6 +106,9 @@ async function initDb() {
       // ADDED: Revenue booked (amount in rupees) - entered in the lead form
       // (Follow up button). NULL = not entered. Existing leads are unchanged.
       ["revenue_booked", "DECIMAL(14,2) NULL"],
+      // ADDED: 3rd calling date (lead form, after the 2nd calling date).
+      // NULL = not entered. Existing leads are unchanged.
+      ["third_calling_date", "DATE NULL"],
     ];
     for (const [col, def] of leadExtraCols) {
       const [exists] = await conn.query(

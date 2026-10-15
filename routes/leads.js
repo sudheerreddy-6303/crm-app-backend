@@ -156,8 +156,10 @@ router.post("/", async (req, res) => {
         calling_remark, next_call_date, priority, source, created_by,
         call_remark_1, call_remark_2, call_remark_3,
         whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3, project_type,
-        whatsapp_date_1, whatsapp_date_2, whatsapp_date_3, walkin, revenue_booked)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        whatsapp_date_1, whatsapp_date_2, whatsapp_date_3, walkin, revenue_booked,
+        third_calling_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      // UPDATED: + third_calling_date (one more "?" above, value added at the end below)
       [
         // ADDED: project_name (optional here; mandatory only during Excel import)
         // ORIGINAL: b.name, b.project_name || "", b.primary_phone, b.assigned_to || null,
@@ -181,6 +183,8 @@ router.post("/", async (req, res) => {
         clean(b.walkin, YES_NO),
         // ADDED: Revenue booked (amount)
         amountOrNull(b.revenue_booked),
+        // ADDED: 3rd calling date
+        dateOrNull(b.third_calling_date),
       ]
     );
     res.status(201).json({ id: result.insertId, message: "Lead created" });
@@ -211,6 +215,8 @@ router.put("/:id", async (req, res) => {
     const push = (col, val) => { fields.push(`${col} = ?`); values.push(val); };
     if ("first_calling_date" in b) push("first_calling_date", dateOrNull(b.first_calling_date));
     if ("second_calling_date" in b) push("second_calling_date", dateOrNull(b.second_calling_date));
+    // ADDED: 3rd calling date
+    if ("third_calling_date" in b) push("third_calling_date", dateOrNull(b.third_calling_date));
     if ("call_category" in b) push("call_category", clean(b.call_category, CALL_CATEGORIES));
     if ("quote_sent" in b) push("quote_sent", clean(b.quote_sent, YES_NO));
     if ("order_booked" in b) push("order_booked", clean(b.order_booked, YES_NO));
