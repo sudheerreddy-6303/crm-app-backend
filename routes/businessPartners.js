@@ -15,6 +15,8 @@ const PARTNER_CATEGORIES = [
   "Business Associates", "Builders", "Contractors", "Franchise Prospect",
   // ADDED: new category
   "Sales",
+  // ADDED: more categories
+  "Freelance Interiors", "Architects", "Others",
 ];
 
 // ADDED: dates come as YYYY-MM-DD from the date inputs; empty -> NULL
@@ -42,7 +44,8 @@ const readBody = (b) => ({
 const validate = (d) => {
   if (!d.person_name || !d.contact) return "Person name and contact number are required";
   // ADDED: business name and location are now required too
-  if (!d.business_name) return "Business name is required";
+  // UPDATED: business name is optional now
+  // ORIGINAL: if (!d.business_name) return "Business name is required";
   if (!d.location) return "Location is required";
   if (d.category && !PARTNER_CATEGORIES.includes(d.category)) return "Invalid category";
   return null;

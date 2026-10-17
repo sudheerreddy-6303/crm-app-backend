@@ -82,6 +82,10 @@ function extract(body) {
     last_calling_date: /^\d{4}-\d{2}-\d{2}$/.test(String(body.last_calling_date || "")) ? body.last_calling_date : null,
     units_booked_interiors: num(body.units_booked_interiors),
     units_sold: num(body.units_sold),
+    // ADDED: how many towers / flats, how much data in CRM
+    total_towers: num(body.total_towers),
+    total_flats: num(body.total_flats),
+    crm_data_count: num(body.crm_data_count),
   };
 }
 
@@ -97,12 +101,15 @@ router.post("/", async (req, res) => {
       `INSERT INTO projects
        (project_name, owner_contact, secondary_number, location, address, type,
         sales_executive, phone1, phone2, status, data_in_crm, marketing,
-        rounds_called, last_calling_date, units_booked_interiors, units_sold, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        rounds_called, last_calling_date, units_booked_interiors, units_sold, created_by,
+        total_towers, total_flats, crm_data_count)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      // UPDATED: + total_towers, total_flats, crm_data_count (3 more "?" and values at the end)
       [
         f.project_name, f.owner_contact, f.secondary_number, f.location, f.address, f.type,
         f.sales_executive, f.phone1, f.phone2, f.status, f.data_in_crm, f.marketing,
         f.rounds_called, f.last_calling_date, f.units_booked_interiors, f.units_sold, req.user.id,
+        f.total_towers, f.total_flats, f.crm_data_count,
       ]
     );
 
@@ -125,12 +132,15 @@ router.put("/:id", async (req, res) => {
       `UPDATE projects SET project_name = ?, owner_contact = ?, secondary_number = ?,
        location = ?, address = ?, type = ?, sales_executive = ?, phone1 = ?, phone2 = ?,
        status = ?, data_in_crm = ?, marketing = ?, rounds_called = ?, last_calling_date = ?,
-       units_booked_interiors = ?, units_sold = ?
+       units_booked_interiors = ?, units_sold = ?,
+       total_towers = ?, total_flats = ?, crm_data_count = ?
        WHERE id = ?`,
+      // UPDATED: + total_towers, total_flats, crm_data_count (before the id)
       [
         f.project_name, f.owner_contact, f.secondary_number, f.location, f.address, f.type,
         f.sales_executive, f.phone1, f.phone2, f.status, f.data_in_crm, f.marketing,
-        f.rounds_called, f.last_calling_date, f.units_booked_interiors, f.units_sold, req.params.id,
+        f.rounds_called, f.last_calling_date, f.units_booked_interiors, f.units_sold,
+        f.total_towers, f.total_flats, f.crm_data_count, req.params.id,
       ]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: "Project not found" });

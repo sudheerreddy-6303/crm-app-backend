@@ -47,6 +47,8 @@ router.get("/", async (req, res) => {
     // clickable dashboard cards. Normal categories behave exactly as before.
     if (category) {
       if (category === "FRESH") where.push("(l.call_category = '' OR l.call_category IS NULL)");
+      // ADDED: "NI_NA" = Not interested + Not answered together (dashboard card)
+      else if (category === "NI_NA") where.push("l.call_category IN ('NOT INTERESTED', 'NOT ANSWERED')");
       else { where.push("l.call_category = ?"); params.push(category); }
     }
     if (quote) { where.push("l.quote_sent = ?"); params.push(quote); }

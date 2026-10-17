@@ -163,6 +163,56 @@ async function initDb() {
       }
     }
 
+    // ADDED: Interior Designer details for service calls (shown in the form when
+    // Category = "Interior Designer"): experience range, interview attended,
+    // current work location, company, designation, salary, 3 follow-ups and the
+    // name of the uploaded CV. New columns only - existing data is untouched.
+    const designerCols = [
+      ["exp_range", "VARCHAR(10) DEFAULT ''"],
+      ["interview_attended", "VARCHAR(3) DEFAULT ''"],
+      ["current_location", "VARCHAR(200) DEFAULT ''"],
+      ["company_name", "VARCHAR(200) DEFAULT ''"],
+      ["designation", "VARCHAR(150) DEFAULT ''"],
+      ["salary", "VARCHAR(50) DEFAULT ''"],
+      ["followup1_date", "DATE NULL"],
+      ["followup1_remark", "TEXT NULL"],
+      ["followup2_date", "DATE NULL"],
+      ["followup2_remark", "TEXT NULL"],
+      ["followup3_date", "DATE NULL"],
+      ["followup3_remark", "TEXT NULL"],
+      ["cv_name", "VARCHAR(255) DEFAULT ''"],
+    ];
+    for (const [col, def] of designerCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'service_calls' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to service_calls table`);
+        await conn.query(`ALTER TABLE service_calls ADD COLUMN ${col} ${def}`);
+      }
+    }
+
+    // ADDED: CV files for service calls (Interior Designers). Kept in their own
+    // table so the service call lists stay fast (the file is only read when
+    // someone clicks "View CV"). One CV per service call - uploading again
+    // replaces it. Deleting the service call deletes its CV.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS service_call_cvs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        service_call_id INT NOT NULL UNIQUE,
+        file_name VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        size_bytes INT NOT NULL,
+        data MEDIUMBLOB NOT NULL,
+        uploaded_by INT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (service_call_id) REFERENCES service_calls(id) ON DELETE CASCADE,
+        FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
     // ADDED: Walk-ins table - records customers who walk in to an experience
     // centre. purpose is VARCHAR (not ENUM) so new purposes can be added later
     // without a database migration, matching the service_calls pattern.
@@ -243,6 +293,26 @@ async function initDb() {
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       )
     `);
+
+    // ADDED: migration - project size + CRM data count (Project Details form):
+    // number of towers, number of flats, how much data is in the CRM.
+    // Existing projects get 0. Safe to run on every startup.
+    const projectExtraCols = [
+      ["total_towers", "INT DEFAULT 0"],
+      ["total_flats", "INT DEFAULT 0"],
+      ["crm_data_count", "INT DEFAULT 0"],
+    ];
+    for (const [col, def] of projectExtraCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to projects table`);
+        await conn.query(`ALTER TABLE projects ADD COLUMN ${col} ${def}`);
+      }
+    }
 
     // ADDED: Business Associates & Franchise table. category is VARCHAR (not
     // ENUM) so new categories can be added later without a DB migration.
