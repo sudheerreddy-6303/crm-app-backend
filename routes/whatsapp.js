@@ -21,6 +21,13 @@ function todayLocal() {
   return d.toISOString().slice(0, 10);
 }
 
+// ADDED: Meta WhatsApp read / delivered / failed numbers. Empty = not entered (NULL).
+const statOrNull = (v) => {
+  if (v === undefined || v === null || String(v).trim() === "") return null;
+  const n = Number(String(v).replace(/\D/g, ""));
+  return Number.isFinite(n) ? n : null;
+};
+
 router.post("/", async (req, res) => {
   try {
     const isAdmin = req.user.role === "admin";
@@ -34,6 +41,8 @@ router.post("/", async (req, res) => {
       ? [...new Set(req.body.projects.map((p) => String(p || "").trim()).filter(Boolean))]
       : [];
     if (projects.length === 0) return res.status(400).json({ error: "Select at least one project" });
+    // ADDED: only ONE project per request
+    if (projects.length > 1) return res.status(400).json({ error: "Select only one project" });
 
     const count = Number(req.body.count);
     if (!Number.isInteger(count) || count <= 0) return res.status(400).json({ error: "Count must be a number greater than 0" });
@@ -51,6 +60,13 @@ router.post("/", async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [channel, tc.id, tc.name || "", JSON.stringify(projects), projects.length, count, sendDate, req.user.id, req.user.name || ""]
     );
+    // ADDED: Meta WhatsApp only - read / delivered / failed (optional)
+    if (channel === "meta") {
+      await pool.query(
+        "UPDATE whatsapp_requests SET read_count = ?, delivered_count = ?, failed_count = ? WHERE id = ?",
+        [statOrNull(req.body.read_count), statOrNull(req.body.delivered_count), statOrNull(req.body.failed_count), r.insertId]
+      );
+    }
     res.json({ message: "WhatsApp request saved", id: r.insertId });
   } catch (err) {
     console.error(err);
@@ -71,6 +87,8 @@ router.get("/", async (req, res) => {
     const [rows] = await pool.query(
       `SELECT id, channel, telecaller_id, telecaller_name, projects, project_count, count,
               DATE_FORMAT(send_date, '%Y-%m-%d') AS send_date, created_by_name, created_at,
+              -- ADDED: Meta WhatsApp read / delivered / failed
+              read_count, delivered_count, failed_count,
               -- ADDED: exact saved moment as epoch seconds, so the page shows the correct
               -- India time whatever timezone MySQL / the server are set to
               UNIX_TIMESTAMP(created_at) AS created_ts
@@ -86,6 +104,29 @@ router.get("/", async (req, res) => {
         return { ...r, projects: Array.isArray(list) ? list : [] };
       }),
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: PUT /api/whatsapp/:id/stats  - update read / delivered / failed later
+// (these numbers usually come in after the messages are sent).
+// Admin: any request. Telecaller: only their own requests.
+router.put("/:id/stats", async (req, res) => {
+  try {
+    const [[row]] = await pool.query("SELECT id, telecaller_id, channel FROM whatsapp_requests WHERE id = ?", [req.params.id]);
+    if (!row) return res.status(404).json({ error: "Request not found" });
+    if (req.user.role !== "admin" && Number(row.telecaller_id) !== Number(req.user.id)) {
+      return res.status(403).json({ error: "You can update only your own requests" });
+    }
+    if (row.channel !== "meta") return res.status(400).json({ error: "Read / delivered numbers are only for Meta WhatsApp" });
+    const read = statOrNull(req.body.read_count), delivered = statOrNull(req.body.delivered_count), failed = statOrNull(req.body.failed_count);
+    await pool.query(
+      "UPDATE whatsapp_requests SET read_count = ?, delivered_count = ?, failed_count = ? WHERE id = ?",
+      [read, delivered, failed, req.params.id]
+    );
+    res.json({ message: "Message status updated", read_count: read, delivered_count: delivered, failed_count: failed });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

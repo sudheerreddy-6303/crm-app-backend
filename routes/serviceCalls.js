@@ -19,6 +19,20 @@ const SERVICE_CATEGORIES = [
   "Printer Repair", "Chair Repair", "Site Managers",
 ];
 
+// ADDED: categories added from the app (table service_call_categories).
+async function customCategories() {
+  try {
+    const [rows] = await pool.query("SELECT id, name FROM service_call_categories ORDER BY name");
+    return rows;
+  } catch (e) {
+    return []; // table not created yet - built-in list only
+  }
+}
+// built-in + added categories (used to validate a saved category)
+async function allCategories() {
+  return [...SERVICE_CATEGORIES, ...(await customCategories()).map((r) => r.name)];
+}
+
 // ADDED: duplicate protection by phone number.
 // Two numbers are the same if their last 10 digits match, so "+91 98490 12345",
 // "919849012345" and "9849012345" all count as the same person.
@@ -32,7 +46,10 @@ async function findByPhone(phone, excludeId = null) {
   if (key.length < 10) return null;
   // narrow down in SQL with the last 4 digits, then compare exactly in JS
   const [rows] = await pool.query(
-    `SELECT s.*, u.name AS created_by_name FROM service_calls s
+    // follow-up dates as plain YYYY-MM-DD text (no timezone day-shift)
+    `SELECT s.*, DATE_FORMAT(s.followup1_date, '%Y-%m-%d') AS followup1_date,
+       DATE_FORMAT(s.followup2_date, '%Y-%m-%d') AS followup2_date, DATE_FORMAT(s.followup3_date, '%Y-%m-%d') AS followup3_date,
+       u.name AS created_by_name FROM service_calls s
      LEFT JOIN users u ON u.id = s.created_by
      WHERE s.phone LIKE ? ORDER BY s.created_at DESC`,
     [`%${key.slice(-4)}%`]
@@ -78,12 +95,66 @@ async function saveDesignerDetails(id, b) {
   );
 }
 
+// ADDED: 3 follow-ups (date + remark) for EVERY other category.
+// Interior Designers keep saving them through saveDesignerDetails (unchanged).
+async function saveFollowups(id, b) {
+  if (!b || !("followup1_date" in b || "followup1_remark" in b)) return; // nothing sent
+  if (String(b.category || "").trim() === "Interior Designer") return; // done above
+  const t = (v, max) => String(v || "").trim().slice(0, max);
+  await pool.query(
+    `UPDATE service_calls SET followup1_date = ?, followup1_remark = ?, followup2_date = ?,
+       followup2_remark = ?, followup3_date = ?, followup3_remark = ? WHERE id = ?`,
+    [
+      designerDate(b.followup1_date), t(b.followup1_remark, 5000),
+      designerDate(b.followup2_date), t(b.followup2_remark, 5000),
+      designerDate(b.followup3_date), t(b.followup3_remark, 5000),
+      id,
+    ]
+  );
+}
+
 // GET /api/service-calls  - list with search + category filter + pagination
+// ADDED: GET /api/service-calls/categories -> { builtin: [...], custom: [{ id, name }] }
+router.get("/categories", async (req, res) => {
+  res.json({ builtin: SERVICE_CATEGORIES, custom: await customCategories() });
+});
+
+// ADDED: POST /api/service-calls/categories { name }  - add a new category (any logged-in user)
+router.post("/categories", async (req, res) => {
+  try {
+    const name = String(req.body.name || "").replace(/\s+/g, " ").trim();
+    if (!name) return res.status(400).json({ error: "Please enter the category name" });
+    if (name.length > 60) return res.status(400).json({ error: "Category name is too long (max 60 letters)" });
+    const same = (await allCategories()).find((c) => c.toLowerCase() === name.toLowerCase());
+    if (same) return res.status(409).json({ error: `"${same}" is already in the list`, name: same });
+    const [r] = await pool.query("INSERT INTO service_call_categories (name, created_by) VALUES (?, ?)", [name, req.user.id]);
+    res.status(201).json({ id: r.insertId, name, message: `Category "${name}" added` });
+  } catch (err) {
+    console.error("Service call category add error:", err);
+    res.status(500).json({ error: "Failed to add category" });
+  }
+});
+
+// ADDED: DELETE /api/service-calls/categories/:id  - admin only. Removes it from
+// the dropdown; service calls already saved with it keep their category text.
+router.delete("/categories/:id", adminOnly, async (req, res) => {
+  try {
+    const [r] = await pool.query("DELETE FROM service_call_categories WHERE id = ?", [req.params.id]);
+    if (r.affectedRows === 0) return res.status(404).json({ error: "Category not found" });
+    res.json({ message: "Category removed from the list" });
+  } catch (err) {
+    console.error("Service call category delete error:", err);
+    res.status(500).json({ error: "Failed to remove category" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     // ORIGINAL: const { search = "", category = "", page = 1, limit = 50 } = req.query;
     // UPDATED: + location and experience filters
-    const { search = "", category = "", location = "", experience = "", page = 1, limit = 50 } = req.query;
+    // ADDED: + assigned filter ("" = all, "none" = not assigned, "me" = mine, or a telecaller id)
+    // ORIGINAL (full line): const { search = "", category = "", location = "", experience = "", page = 1, limit = 50 } = req.query;
+    const { search = "", category = "", location = "", experience = "", assigned = "", page = 1, limit = 50 } = req.query;
 
     const where = [];
     const params = [];
@@ -106,6 +177,16 @@ router.get("/", async (req, res) => {
       where.push("LOWER(TRIM(s.experience)) = LOWER(TRIM(?))");
       params.push(experience);
     }
+    // ADDED: assigned-to filter
+    if (assigned === "none") {
+      where.push("s.assigned_to IS NULL");
+    } else if (assigned === "me") {
+      where.push("s.assigned_to = ?");
+      params.push(req.user.id);
+    } else if (assigned && /^\d+$/.test(String(assigned))) {
+      where.push("s.assigned_to = ?");
+      params.push(Number(assigned));
+    }
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const lim = Math.min(Number(limit) || 50, 200);
@@ -115,8 +196,15 @@ router.get("/", async (req, res) => {
       `SELECT COUNT(*) AS total FROM service_calls s ${whereSql}`, params
     );
     const [rows] = await pool.query(
-      `SELECT s.*, u.name AS created_by_name
+      // ORIGINAL: `SELECT s.*, u.name AS created_by_name
+      // FIXED: follow-up dates as plain YYYY-MM-DD text (they showed 1 day early in India time)
+      `SELECT s.*, DATE_FORMAT(s.followup1_date, '%Y-%m-%d') AS followup1_date,
+         DATE_FORMAT(s.followup2_date, '%Y-%m-%d') AS followup2_date, DATE_FORMAT(s.followup3_date, '%Y-%m-%d') AS followup3_date,
+         u.name AS created_by_name,
+         -- ADDED: assigned telecaller name + date
+         au.name AS assigned_to_name, DATE_FORMAT(s.assigned_at, '%Y-%m-%d') AS assigned_on
        FROM service_calls s LEFT JOIN users u ON u.id = s.created_by
+       LEFT JOIN users au ON au.id = s.assigned_to
        ${whereSql}
        ORDER BY s.created_at DESC
        LIMIT ? OFFSET ?`,
@@ -170,6 +258,8 @@ router.get("/stats", async (req, res) => {
     );
     const map = new Map();
     SERVICE_CATEGORIES.forEach((c) => map.set(c, 0));
+    // ADDED: categories added from the app also get a card (0 if none yet)
+    (await customCategories()).forEach((c) => { if (!map.has(c.name)) map.set(c.name, 0); });
     let total = 0;
     rows.forEach((r) => {
       const n = Number(r.count) || 0;
@@ -184,6 +274,38 @@ router.get("/stats", async (req, res) => {
   }
 });
 
+// ADDED: PUT /api/service-calls/assign  { ids: [..], telecaller_id }  - ADMIN ONLY
+// Assigns one or many service calls to a telecaller. telecaller_id = null/"" -> unassign.
+router.put("/assign", adminOnly, async (req, res) => {
+  try {
+    const ids = (Array.isArray(req.body.ids) ? req.body.ids : [req.body.id])
+      .map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (!ids.length) return res.status(400).json({ error: "Select at least one service call" });
+    const raw = req.body.telecaller_id;
+    let tcId = null, tcName = "";
+    if (raw !== null && raw !== undefined && raw !== "") {
+      const [u] = await pool.query("SELECT id, name, role FROM users WHERE id = ?", [Number(raw)]);
+      if (!u.length) return res.status(400).json({ error: "Telecaller not found" });
+      if (u[0].role !== "telecaller") return res.status(400).json({ error: "Service calls can be assigned to telecallers only" });
+      tcId = u[0].id; tcName = u[0].name;
+    }
+    const [r] = await pool.query(
+      `UPDATE service_calls SET assigned_to = ?, assigned_at = ${tcId ? "NOW()" : "NULL"}, assigned_by = ? WHERE id IN (?)`,
+      [tcId, tcId ? req.user.id : null, ids]
+    );
+    const n = r.affectedRows;
+    res.json({
+      updated: n,
+      message: tcId
+        ? `${n} service call${n === 1 ? "" : "s"} assigned to ${tcName}`
+        : `${n} service call${n === 1 ? "" : "s"} unassigned`,
+    });
+  } catch (err) {
+    console.error("Service call assign error:", err);
+    res.status(500).json({ error: "Failed to assign service call" });
+  }
+});
+
 // POST /api/service-calls  - create a service call
 router.post("/", async (req, res) => {
   try {
@@ -193,7 +315,9 @@ router.post("/", async (req, res) => {
     if (!String(name).trim() || !String(phone).trim()) {
       return res.status(400).json({ error: "Name and phone number are required" });
     }
-    if (category && !SERVICE_CATEGORIES.includes(category)) {
+    // ORIGINAL: if (category && !SERVICE_CATEGORIES.includes(category)) {
+    // UPDATED: also accepts categories added from the app
+    if (category && !(await allCategories()).includes(category)) {
       return res.status(400).json({ error: "Invalid category" });
     }
     // ADDED: no duplicates - the same phone number cannot be added twice
@@ -215,6 +339,8 @@ router.post("/", async (req, res) => {
 
     // ADDED: Interior Designer details (only when the form sent them)
     await saveDesignerDetails(result.insertId, req.body);
+    // ADDED: follow-ups for all other categories
+    await saveFollowups(result.insertId, req.body);
 
     res.status(201).json({ id: result.insertId, message: "Service call added" });
   } catch (err) {
@@ -232,7 +358,9 @@ router.put("/:id", async (req, res) => {
     if (!String(name).trim() || !String(phone).trim()) {
       return res.status(400).json({ error: "Name and phone number are required" });
     }
-    if (category && !SERVICE_CATEGORIES.includes(category)) {
+    // ORIGINAL: if (category && !SERVICE_CATEGORIES.includes(category)) {
+    // UPDATED: also accepts categories added from the app
+    if (category && !(await allCategories()).includes(category)) {
       return res.status(400).json({ error: "Invalid category" });
     }
     // ADDED: no duplicates - can't change a number to one another record already has
@@ -254,6 +382,8 @@ router.put("/:id", async (req, res) => {
     if (result.affectedRows === 0) return res.status(404).json({ error: "Service call not found" });
     // ADDED: Interior Designer details (only when the form sent them)
     await saveDesignerDetails(req.params.id, req.body);
+    // ADDED: follow-ups for all other categories
+    await saveFollowups(req.params.id, req.body);
 
     res.json({ message: "Service call updated" });
   } catch (err) {
@@ -302,6 +432,8 @@ router.post("/import", adminOnly, async (req, res) => {
     const existingPhones = new Set(existingRows.map((r) => phoneKey(r.phone)));
 
     let inserted = 0, skipped = 0, duplicates = 0, invalidPhone = 0;
+    // ADDED: built-in + added categories (loaded once for the whole sheet)
+    const importCats = await allCategories();
 
     for (const b of rows) {
       const name = String(b.name || "").trim();
@@ -327,7 +459,9 @@ router.post("/import", adminOnly, async (req, res) => {
       // custom category not in the list, keep the raw value as-is (the column is
       // VARCHAR, not ENUM) instead of dropping it - nothing from the sheet is lost.
       const rawCat = String(b.category || "").trim();
-      const canonical = SERVICE_CATEGORIES.find(
+      // UPDATED: also matches categories added from the app
+      // ORIGINAL: const canonical = SERVICE_CATEGORIES.find(
+      const canonical = importCats.find(
         (c) => c.toLowerCase() === rawCat.toLowerCase()
       );
       const category = canonical || rawCat;

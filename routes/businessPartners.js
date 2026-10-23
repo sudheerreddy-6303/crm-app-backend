@@ -52,6 +52,38 @@ const validate = (d) => {
 };
 
 // GET /api/business-partners  - list with search + category filter + pagination
+// ADDED: GET /api/business-partners/lookup?phone=...  -> { found, partner, matches }
+// Used by the Add form: when a typed Contact / WhatsApp number is already saved,
+// that record's details are loaded. Numbers match on the last 10 digits
+// ("+91 98490 12345" = "9849012345"). Dates come back as plain YYYY-MM-DD text.
+const bpPhoneKey = (v) => {
+  const d = String(v || "").replace(/\D/g, "");
+  return d.length > 10 ? d.slice(-10) : d;
+};
+router.get("/lookup", async (req, res) => {
+  try {
+    const key = bpPhoneKey(req.query.phone);
+    if (key.length < 10) return res.json({ found: false, partner: null, matches: 0 });
+    const like = `%${key.slice(-4)}%`;
+    const [rows] = await pool.query(
+      `SELECT b.*, u.name AS created_by_name,
+              DATE_FORMAT(b.calling_date, '%Y-%m-%d') AS calling_date,
+              DATE_FORMAT(b.whatsapp_sent_date, '%Y-%m-%d') AS whatsapp_sent_date,
+              DATE_FORMAT(b.calling_date_2, '%Y-%m-%d') AS calling_date_2,
+              DATE_FORMAT(b.whatsapp_sent_date_2, '%Y-%m-%d') AS whatsapp_sent_date_2
+       FROM business_partners b LEFT JOIN users u ON u.id = b.created_by
+       WHERE b.contact LIKE ? OR b.whatsapp LIKE ?
+       ORDER BY b.created_at DESC, b.id DESC`,
+      [like, like]
+    );
+    const hits = rows.filter((b) => [b.contact, b.whatsapp].some((n) => bpPhoneKey(n) === key));
+    res.json({ found: hits.length > 0, partner: hits[0] || null, matches: hits.length });
+  } catch (err) {
+    console.error("Business partner lookup error:", err);
+    res.status(500).json({ error: "Failed to check phone number" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const { search = "", category = "", page = 1, limit = 50 } = req.query;

@@ -17,6 +17,33 @@ const WALKIN_PURPOSES = [
 ];
 
 // GET /api/walkins  - list with search + purpose filter + pagination
+// ADDED: GET /api/walkins/lookup?phone=...  -> { found, walkin, matches }
+// Used by the "Add walk-in" form: when a typed phone / alternate mobile is
+// already saved on a walk-in, that walk-in's details are loaded. Numbers match
+// on the last 10 digits ("+91 98490 12345" = "9849012345").
+const walkinPhoneKey = (v) => {
+  const d = String(v || "").replace(/\D/g, "");
+  return d.length > 10 ? d.slice(-10) : d;
+};
+router.get("/lookup", async (req, res) => {
+  try {
+    const key = walkinPhoneKey(req.query.phone);
+    if (key.length < 10) return res.json({ found: false, walkin: null, matches: 0 });
+    const like = `%${key.slice(-4)}%`;
+    const [rows] = await pool.query(
+      // visit_date as plain YYYY-MM-DD text so it never shifts a day with the server timezone
+      `SELECT w.*, DATE_FORMAT(w.visit_date, '%Y-%m-%d') AS visit_date FROM walkins w WHERE w.phone LIKE ? OR w.alt_phone LIKE ?
+       ORDER BY w.created_at DESC, w.id DESC`,
+      [like, like]
+    );
+    const hits = rows.filter((w) => [w.phone, w.alt_phone].some((n) => walkinPhoneKey(n) === key));
+    res.json({ found: hits.length > 0, walkin: hits[0] || null, matches: hits.length });
+  } catch (err) {
+    console.error("Walk-in lookup error:", err);
+    res.status(500).json({ error: "Failed to check phone number" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const { search = "", purpose = "", page = 1, limit = 50 } = req.query;

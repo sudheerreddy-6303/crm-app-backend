@@ -181,6 +181,10 @@ async function initDb() {
       ["followup3_date", "DATE NULL"],
       ["followup3_remark", "TEXT NULL"],
       ["cv_name", "VARCHAR(255) DEFAULT ''"],
+      // ADDED: service call assigned to a telecaller (admin assigns) + when / by whom
+      ["assigned_to", "INT NULL"],
+      ["assigned_at", "DATETIME NULL"],
+      ["assigned_by", "INT NULL"],
     ];
     for (const [col, def] of designerCols) {
       const [exists] = await conn.query(
@@ -210,6 +214,19 @@ async function initDb() {
         uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (service_call_id) REFERENCES service_calls(id) ON DELETE CASCADE,
         FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
+    // ADDED: extra Service Call categories added from the app ("+ Add new
+    // category" in the Category dropdown). The built-in list stays in
+    // routes/serviceCalls.js; these are added on top of it.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS service_call_categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL UNIQUE,
+        created_by INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       )
     `);
 
@@ -301,6 +318,11 @@ async function initDb() {
       ["total_towers", "INT DEFAULT 0"],
       ["total_flats", "INT DEFAULT 0"],
       ["crm_data_count", "INT DEFAULT 0"],
+      // ADDED: sales executive 1 phone + sales executive 2 name / phone
+      // (sales executive 1 name is the existing sales_executive column)
+      ["sales_exec1_phone", "VARCHAR(20) DEFAULT ''"],
+      ["sales_exec2_name", "VARCHAR(150) DEFAULT ''"],
+      ["sales_exec2_phone", "VARCHAR(20) DEFAULT ''"],
     ];
     for (const [col, def] of projectExtraCols) {
       const [exists] = await conn.query(
@@ -412,6 +434,25 @@ async function initDb() {
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       )
     `);
+
+    // ADDED: Meta WhatsApp delivery numbers - read / delivered / failed counts
+    // (NULL = not entered yet). Read + Delivered is worked out from these.
+    const waStatCols = [
+      ["read_count", "INT NULL"],
+      ["delivered_count", "INT NULL"],
+      ["failed_count", "INT NULL"],
+    ];
+    for (const [col, def] of waStatCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'whatsapp_requests' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to whatsapp_requests table`);
+        await conn.query(`ALTER TABLE whatsapp_requests ADD COLUMN ${col} ${def}`);
+      }
+    }
 
     // Seed admin from env variables (never hardcode credentials in code)
     const adminEmail = process.env.ADMIN_EMAIL || "admin@telecrm.local";
