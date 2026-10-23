@@ -4,6 +4,8 @@
 const express = require("express");
 const { pool } = require("../db");
 const { auth, adminOnly } = require("../middleware/auth");
+// ADDED: live "Data in CRM (count)" = leads in the CRM for each project
+const { attachLeadCounts, countForName } = require("../utils/projectLeadCounts");
 
 const router = express.Router();
 router.use(auth);
@@ -51,10 +53,23 @@ router.get("/lookup", async (req, res) => {
       [p.owner_contact, p.secondary_number, p.phone1, p.phone2].some((n) => projPhoneKey(n) === key)
       && String(p.id) !== String(req.query.exclude || "")
     );
+    // ADDED: live Data in CRM count for the found project
+    await attachLeadCounts(hits);
     res.json({ found: hits.length > 0, project: hits[0] || null, matches: hits.length });
   } catch (err) {
     console.error("Project lookup error:", err);
     res.status(500).json({ error: "Failed to check phone number" });
+  }
+});
+
+// ADDED: GET /api/projects/crm-count?name=...  -> { count }
+// Leads in the CRM for a project name typed in the Add / Edit project form.
+router.get("/crm-count", async (req, res) => {
+  try {
+    res.json({ count: await countForName(req.query.name) });
+  } catch (err) {
+    console.error("Project CRM count error:", err);
+    res.status(500).json({ error: "Could not count the data in CRM" });
   }
 });
 
@@ -90,6 +105,8 @@ router.get("/", async (req, res) => {
       [...params, lim, offset]
     );
 
+    // ADDED: live "Data in CRM (count)" for each project (crm_leads_count)
+    await attachLeadCounts(rows);
     res.json({ total: countRows[0].total, page: Number(page) || 1, limit: lim, projects: rows });
   } catch (err) {
     console.error("Projects list error:", err);

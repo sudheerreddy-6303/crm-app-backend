@@ -74,6 +74,77 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ADDED: GET /api/whatsapp/count?project=<name>&telecaller_id=<id>
+// Fills the "Count" box automatically when a project is picked in the form.
+//  - Project  -> UPDATED: total leads in the project = same number as the Projects cards
+//    (PREVIOUS: the project's "How much data in CRM" number from Project Details).
+//    (ORIGINAL: number of leads in that project - own leads for a telecaller,
+//     the picked telecaller's leads for admin, all leads when nobody is picked.)
+//  - Group (Interior Designers / Tele Callers / Sales Executive)
+//      -> number of service calls in that category.
+const WA_GROUP_CATEGORY = {
+  "Interior Designers": "Interior Designer",
+  "Tele Callers": "Tele Callers",
+  "Sales Executive": "Sales Executive",
+};
+router.get("/count", async (req, res) => {
+  try {
+    const project = String(req.query.project || "").trim();
+    if (!project) return res.status(400).json({ error: "Project is required" });
+
+    const category = WA_GROUP_CATEGORY[project];
+    if (category) {
+      const [[r]] = await pool.query(
+        `SELECT COUNT(*) AS c FROM service_calls
+         WHERE LOWER(TRIM(category)) = LOWER(?) AND phone IS NOT NULL AND TRIM(phone) <> ''`,
+        [category]
+      );
+      return res.json({ count: Number(r.c) || 0, source: "service_calls", label: `service calls in ${category}` });
+    }
+
+    // UPDATED: Count = the same number as the big number on the Projects cards
+    // (GET /dashboard/project-summary "total_leads"): all leads with this project name;
+    // a telecaller sees only their own leads (same as their Projects cards).
+    const conds = ["project_name = ?"];
+    const params = [project];
+    if (req.user.role !== "admin") { conds.push("assigned_to = ?"); params.push(req.user.id); }
+    const [[r]] = await pool.query(`SELECT COUNT(*) AS c FROM leads WHERE ${conds.join(" AND ")}`, params);
+    return res.json({
+      count: Number(r.c) || 0,
+      source: "leads",
+      label: req.user.role === "admin" ? "total data in this project" : "your data in this project",
+    });
+
+    // PREVIOUS (used the project's "How much data in CRM" field - replaced as asked):
+    // // UPDATED: Count = the project's "How much data in CRM" number (Project Details page).
+    // // Not filled (0 / no project row) -> count: null, the form shows a note and leaves Count empty.
+    // const [pr] = await pool.query(
+    // `SELECT MAX(crm_data_count) AS c FROM projects WHERE LOWER(TRIM(project_name)) = LOWER(TRIM(?))`,
+    // [project]
+    // );
+    // const crm = pr.length ? Number(pr[0].c) || 0 : 0;
+    // if (crm > 0) return res.json({ count: crm, source: "project", label: "How much data in CRM" });
+    // return res.json({ count: null, source: "project", label: "\"How much data in CRM\" is not filled for this project (Project Details)" });
+
+    // ORIGINAL (counted the telecaller's leads in the project - replaced as asked):
+    // let tcId = null;
+    // if (req.user.role !== "admin") {
+    // tcId = req.user.id;
+    // } else if (req.query.telecaller_id) {
+    // const [u] = await pool.query("SELECT id, role FROM users WHERE id = ?", [Number(req.query.telecaller_id)]);
+    // if (u.length && u[0].role === "telecaller") tcId = u[0].id; // admin picked -> all leads
+    // }
+    // const conds = ["project_name = ?", "primary_phone IS NOT NULL", "TRIM(primary_phone) <> ''"];
+    // const params = [project];
+    // if (tcId) { conds.push("assigned_to = ?"); params.push(tcId); }
+    // const [[r]] = await pool.query(`SELECT COUNT(*) AS c FROM leads WHERE ${conds.join(" AND ")}`, params);
+    // res.json({ count: Number(r.c) || 0, source: "leads", label: tcId ? "leads of this telecaller" : "leads in this project" });
+  } catch (err) {
+    console.error("WhatsApp count error:", err);
+    res.status(500).json({ error: "Could not get the count" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const isAdmin = req.user.role === "admin";
