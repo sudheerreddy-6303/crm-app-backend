@@ -3,6 +3,8 @@
 // all routes, pool queries, search + category filter, pagination).
 const express = require("express");
 const { pool } = require("../db");
+// ADDED: State / City / Location from the forms
+const { saveAddress } = require("../utils/saveAddress");
 const { auth, adminOnly } = require("../middleware/auth");
 
 const router = express.Router();
@@ -151,6 +153,7 @@ router.post("/", async (req, res) => {
        // ADDED: owner's name
        d.owner_name]
     );
+    await saveAddress("business_partners", result.insertId, req.body); // ADDED: state / city
     res.status(201).json({ id: result.insertId, message: "Record added" });
   } catch (err) {
     console.error("Business partner create error:", err);
@@ -181,6 +184,7 @@ router.put("/:id", async (req, res) => {
        d.owner_name, req.params.id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: "Record not found" });
+    await saveAddress("business_partners", req.params.id, req.body); // ADDED: state / city
     res.json({ message: "Record updated" });
   } catch (err) {
     console.error("Business partner update error:", err);

@@ -48,7 +48,9 @@ async function initDb() {
         whatsapp_category VARCHAR(100) DEFAULT '',
         calling_remark TEXT,
         next_call_date DATE NULL,
-        priority ENUM('none','hot','warm','cold') DEFAULT 'none',
+        -- ORIGINAL: priority ENUM('none','hot','warm','cold') DEFAULT 'none',
+        -- UPDATED: + 'dead'
+        priority ENUM('none','hot','warm','cold','dead') DEFAULT 'none',
         source VARCHAR(100) DEFAULT '',
         created_by INT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -120,6 +122,17 @@ async function initDb() {
         console.log(`Migration: adding ${col} column to leads table`);
         await conn.query(`ALTER TABLE leads ADD COLUMN ${col} ${def}`);
       }
+    }
+
+    // ADDED: Priority "Dead" - existing databases have priority ENUM('none','hot','warm','cold');
+    // add 'dead' to the list. Existing values are kept as they are.
+    const [prioCol] = await conn.query(
+      `SELECT COLUMN_TYPE AS t FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'leads' AND COLUMN_NAME = 'priority'`
+    );
+    if (prioCol.length && !String(prioCol[0].t).includes("'dead'")) {
+      console.log("Migration: adding 'dead' to leads.priority");
+      await conn.query("ALTER TABLE leads MODIFY COLUMN priority ENUM('none','hot','warm','cold','dead') DEFAULT 'none'");
     }
 
     // ADDED: Service Calls table (name, phone, category dropdown, location, remarks)
@@ -379,6 +392,108 @@ async function initDb() {
       if (exists[0].cnt === 0) {
         console.log(`Migration: adding ${col} column to business_partners table`);
         await conn.query(`ALTER TABLE business_partners ADD COLUMN ${col} ${def}`);
+      }
+    }
+
+    // ADDED: walk-in form now has the same fields as the Add lead form.
+    // New columns on walkins only; existing walk-ins are unchanged (empty values).
+    const walkinLeadCols = [
+      ["project_type", "VARCHAR(30) DEFAULT ''"],
+      ["assigned_to", "INT NULL"],
+      ["first_calling_date", "DATE NULL"],
+      ["second_calling_date", "DATE NULL"],
+      ["third_calling_date", "DATE NULL"],
+      ["call_category", "VARCHAR(30) DEFAULT ''"],
+      ["quote_sent", "VARCHAR(3) DEFAULT ''"],
+      ["order_booked", "VARCHAR(3) DEFAULT ''"],
+      ["revenue_booked", "DECIMAL(14,2) NULL"],
+      ["whatsapp_sent_date", "DATE NULL"],
+      ["whatsapp_category", "VARCHAR(100) DEFAULT ''"],
+      ["next_call_date", "DATE NULL"],
+      ["priority", "VARCHAR(10) DEFAULT 'none'"],
+      ["source", "VARCHAR(100) DEFAULT ''"],
+      ["calling_remark", "TEXT NULL"],
+      ["call_remark_1", "TEXT NULL"],
+      ["call_remark_2", "TEXT NULL"],
+      ["call_remark_3", "TEXT NULL"],
+      ["whatsapp_date_1", "DATE NULL"],
+      ["whatsapp_date_2", "DATE NULL"],
+      ["whatsapp_date_3", "DATE NULL"],
+    ];
+    for (const [col, def] of walkinLeadCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'walkins' AND COLUMN_NAME = ?`,
+        [col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to walkins table`);
+        await conn.query(`ALTER TABLE walkins ADD COLUMN ${col} ${def}`);
+      }
+    }
+
+    // ADDED: "Image of project" (Project Details). Kept in its own table so the
+    // project lists stay fast; the image is only read when it is shown.
+    // One image per project - uploading again replaces it. Deleting the project deletes it.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS project_images (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        project_id INT NOT NULL UNIQUE,
+        file_name VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        size_bytes INT NOT NULL,
+        data MEDIUMBLOB NOT NULL,
+        uploaded_by INT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+        FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+    const [imgCol] = await conn.query(
+      `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'image_name'`
+    );
+    if (imgCol[0].cnt === 0) {
+      console.log("Migration: adding image_name column to projects table");
+      await conn.query("ALTER TABLE projects ADD COLUMN image_name VARCHAR(255) DEFAULT ''");
+    }
+
+    // ADDED: one "Call date" + "Call remark" in the lead form. The current call date is
+    // kept on the lead; every change is also written to call history (call_logs.call_date).
+    for (const [table, col] of [["leads", "call_date"], ["call_logs", "call_date"]]) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+        [table, col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to ${table} table`);
+        await conn.query(`ALTER TABLE ${table} ADD COLUMN ${col} DATE NULL`);
+      }
+    }
+
+    // ADDED: State / City / Location in every form (Telangana / Andhra Pradesh).
+    // Only the columns a table does not have yet are added; existing data untouched.
+    const addressCols = [
+      ["leads", "state", "VARCHAR(50) DEFAULT ''"],
+      ["leads", "city", "VARCHAR(100) DEFAULT ''"],
+      ["leads", "location", "VARCHAR(200) DEFAULT ''"],
+      ["service_calls", "state", "VARCHAR(50) DEFAULT ''"],
+      ["walkins", "state", "VARCHAR(50) DEFAULT ''"],
+      ["projects", "state", "VARCHAR(50) DEFAULT ''"],
+      ["projects", "city", "VARCHAR(100) DEFAULT ''"],
+      ["business_partners", "state", "VARCHAR(50) DEFAULT ''"],
+      ["business_partners", "city", "VARCHAR(100) DEFAULT ''"],
+    ];
+    for (const [table, col, def] of addressCols) {
+      const [exists] = await conn.query(
+        `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+        [table, col]
+      );
+      if (exists[0].cnt === 0) {
+        console.log(`Migration: adding ${col} column to ${table} table`);
+        await conn.query(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
       }
     }
 

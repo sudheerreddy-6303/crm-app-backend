@@ -3,6 +3,8 @@ const { pool } = require("../db");
 const { auth } = require("../middleware/auth");
 
 const router = express.Router();
+// ORIGINAL lines (before they were updated) - kept word for word for reference:
+//   `SELECT w.*, DATE_FORMAT(w.first_calling_date, '%Y-%m-%d') AS first_calling_date, DATE_FORMAT(w.second_calling_date, ... (walk-in leads list, before visit_date was added)
 router.use(auth);
 
 // GET /api/dashboard  (admin: all data + per-telecaller; telecaller: own stats)
@@ -159,7 +161,9 @@ router.get("/", async (req, res) => {
     // ADDED: project filter for the upcoming follow-ups table
     if (projectActive) { fuConds.push("l.project_name = ?"); fuParams.push(project); }
     const [followups] = await pool.query(
-      `SELECT l.id, l.name, l.primary_phone, l.next_call_date, l.call_category, u.name AS caller_name
+      // ORIGINAL: `SELECT l.id, l.name, l.primary_phone, l.next_call_date, l.call_category, u.name AS caller_name
+      // FIXED: next call date as plain text (no day shift on India time)
+      `SELECT l.id, l.name, l.primary_phone, DATE_FORMAT(l.next_call_date, '%Y-%m-%d') AS next_call_date, l.call_category, u.name AS caller_name
        FROM leads l LEFT JOIN users u ON u.id = l.assigned_to
        WHERE ${fuConds.join(" AND ")}
        ORDER BY l.next_call_date ASC LIMIT 15`,
@@ -185,7 +189,10 @@ router.get("/walkin-leads", async (req, res) => {
     // UPDATED: returns the same fields as the Walk-ins page (w.* + added by)
     // so the list under "Leads" displays exactly like the Walk-ins page
     const [rows] = await pool.query(
-      `SELECT w.*, u.name AS created_by_name
+      // ORIGINAL: `SELECT w.*, u.name AS created_by_name
+      // UPDATED: + walk-in lead-form dates as plain text, + assigned telecaller name
+      `SELECT w.*, DATE_FORMAT(w.visit_date, '%Y-%m-%d') AS visit_date /* FIXED: no day shift */, DATE_FORMAT(w.first_calling_date, '%Y-%m-%d') AS first_calling_date, DATE_FORMAT(w.second_calling_date, '%Y-%m-%d') AS second_calling_date, DATE_FORMAT(w.third_calling_date, '%Y-%m-%d') AS third_calling_date, DATE_FORMAT(w.whatsapp_sent_date, '%Y-%m-%d') AS whatsapp_sent_date, DATE_FORMAT(w.next_call_date, '%Y-%m-%d') AS next_call_date, DATE_FORMAT(w.whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1, DATE_FORMAT(w.whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2, DATE_FORMAT(w.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3,
+         (SELECT au.name FROM users au WHERE au.id = w.assigned_to) AS assigned_to_name, u.name AS created_by_name
        FROM walkins w LEFT JOIN users u ON u.id = w.created_by
        ${where}
        ORDER BY w.created_at DESC`,

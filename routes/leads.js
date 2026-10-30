@@ -1,13 +1,19 @@
 const express = require("express");
 const { pool } = require("../db");
+// ADDED: State / City / Location from the forms
+const { saveAddress } = require("../utils/saveAddress");
 const { auth, adminOnly } = require("../middleware/auth");
 
 const router = express.Router();
+// ORIGINAL lines (before they were updated) - kept word for word for reference:
+//   WHERE c.lead_id = ? ORDER BY c.log_date DESC`,
 router.use(auth);
 
 const CALL_CATEGORIES = ["", "NOT INTERESTED", "FOLLOW UP", "INTERESTED", "NOT ANSWERED"];
 const YES_NO = ["", "Yes", "No"];
-const PRIORITIES = ["none", "hot", "warm", "cold"];
+// ORIGINAL: const PRIORITIES = ["none", "hot", "warm", "cold"];
+// UPDATED: + "dead"
+const PRIORITIES = ["none", "hot", "warm", "cold", "dead"];
 // ADDED: allowed project types for the lead form dropdown
 const PROJECT_TYPES = ["", "2BHK", "3BHK", "4BHK", "Villa", "Commercial", "Others"];
 
@@ -77,9 +83,17 @@ router.get("/", async (req, res) => {
     const [rows] = await pool.query(
       // UPDATED: WhatsApp 1/2/3 dates returned as plain 'YYYY-MM-DD' text
       `SELECT l.*, u.name AS caller_name,
+              -- FIXED: plain 'YYYY-MM-DD' text for every date (no day shift when the server runs on India time)
+              DATE_FORMAT(l.first_calling_date, '%Y-%m-%d') AS first_calling_date,
+              DATE_FORMAT(l.second_calling_date, '%Y-%m-%d') AS second_calling_date,
+              DATE_FORMAT(l.third_calling_date, '%Y-%m-%d') AS third_calling_date,
+              DATE_FORMAT(l.whatsapp_sent_date, '%Y-%m-%d') AS whatsapp_sent_date,
+              DATE_FORMAT(l.next_call_date, '%Y-%m-%d') AS next_call_date,
               DATE_FORMAT(l.whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,
               DATE_FORMAT(l.whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2,
               DATE_FORMAT(l.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3,
+              -- ADDED: current call date (plain text, no day shift)
+              DATE_FORMAT(l.call_date, '%Y-%m-%d') AS call_date,
               -- ADDED: LAST call details = the latest call history entry of each lead
               -- (exact moment as epoch seconds so the page shows correct India time)
               UNIX_TIMESTAMP(lc.log_date) AS last_call_ts, lc.remark AS last_call_remark,
@@ -107,6 +121,12 @@ router.get("/:id", async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT l.*, u.name AS caller_name,
+              -- FIXED: plain 'YYYY-MM-DD' text for every date (no day shift when the server runs on India time)
+              DATE_FORMAT(l.first_calling_date, '%Y-%m-%d') AS first_calling_date,
+              DATE_FORMAT(l.second_calling_date, '%Y-%m-%d') AS second_calling_date,
+              DATE_FORMAT(l.third_calling_date, '%Y-%m-%d') AS third_calling_date,
+              DATE_FORMAT(l.whatsapp_sent_date, '%Y-%m-%d') AS whatsapp_sent_date,
+              DATE_FORMAT(l.next_call_date, '%Y-%m-%d') AS next_call_date,
               DATE_FORMAT(l.whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,
               DATE_FORMAT(l.whatsapp_date_2, '%Y-%m-%d') AS whatsapp_date_2,
               DATE_FORMAT(l.whatsapp_date_3, '%Y-%m-%d') AS whatsapp_date_3
@@ -189,6 +209,17 @@ router.post("/", async (req, res) => {
         dateOrNull(b.third_calling_date),
       ]
     );
+    await saveAddress("leads", result.insertId, b); // ADDED: state / city / location
+    // ADDED: Call date - saved on the lead, and the first call goes into call history
+    const firstCallDate = dateOrNull(b.call_date);
+    if (firstCallDate) await pool.query("UPDATE leads SET call_date = ? WHERE id = ?", [firstCallDate, result.insertId]);
+    if (b.calling_remark || b.call_category || firstCallDate) {
+      const [lg] = await pool.query(
+        "INSERT INTO call_logs (lead_id, user_id, remark, category) VALUES (?, ?, ?, ?)",
+        [result.insertId, req.user.id, b.calling_remark || "", clean(b.call_category, CALL_CATEGORIES)]
+      );
+      await pool.query("UPDATE call_logs SET call_date = ? WHERE id = ?", [firstCallDate, lg.insertId]);
+    }
     res.status(201).json({ id: result.insertId, message: "Lead created" });
   } catch (err) {
     console.error(err);
@@ -244,6 +275,8 @@ router.put("/:id", async (req, res) => {
     if ("walkin" in b) push("walkin", clean(b.walkin, YES_NO));
     // ADDED: Revenue booked amount (admin + assigned telecaller)
     if ("revenue_booked" in b) push("revenue_booked", amountOrNull(b.revenue_booked));
+    // ADDED: current Call date (admin + assigned telecaller)
+    if ("call_date" in b) push("call_date", dateOrNull(b.call_date));
 
     // Admin-only fields
     if (isAdmin) {
@@ -272,8 +305,14 @@ router.put("/:id", async (req, res) => {
     // so admin can see how many calls each telecaller made per day
     const remarkChanged = "calling_remark" in b && b.calling_remark && b.calling_remark !== lead.calling_remark;
     const categoryChanged = "call_category" in b && b.call_category && b.call_category !== lead.call_category;
-    if (remarkChanged || categoryChanged) {
-      await pool.query(
+    // ADDED: a new Call date also counts as a new call (goes into call history)
+    const [[oldCd]] = await pool.query("SELECT DATE_FORMAT(?, '%Y-%m-%d') AS d", [lead.call_date || null]);
+    const newCallDate = "call_date" in b ? dateOrNull(b.call_date) : null;
+    const callDateChanged = Boolean(newCallDate && newCallDate !== (oldCd && oldCd.d));
+    // ORIGINAL: if (remarkChanged || categoryChanged) {
+    if (remarkChanged || categoryChanged || callDateChanged) {
+      // ORIGINAL: await pool.query(
+      const [lg] = await pool.query(
         "INSERT INTO call_logs (lead_id, user_id, remark, category) VALUES (?, ?, ?, ?)",
         [
           req.params.id,
@@ -282,8 +321,11 @@ router.put("/:id", async (req, res) => {
           b.call_category || lead.call_category || "",
         ]
       );
+      // ADDED: the call date of this history entry
+      await pool.query("UPDATE call_logs SET call_date = ? WHERE id = ?", [newCallDate, lg.insertId]);
     }
 
+    await saveAddress("leads", req.params.id, b); // ADDED: state / city / location
     res.json({ message: "Lead updated" });
   } catch (err) {
     console.error(err);
@@ -391,7 +433,9 @@ router.post("/import", adminOnly, async (req, res) => {
           clean(b.quote_sent, YES_NO), clean(b.order_booked, YES_NO),
           dateOrNull(b.whatsapp_sent_date), b.whatsapp_category || "",
           b.calling_remark || "", dateOrNull(b.next_call_date),
-          clean(b.priority, PRIORITIES, "none"), b.source || "Import", req.user.id,
+          // ORIGINAL: clean(b.priority, PRIORITIES, "none"), b.source || "Import", req.user.id,
+          // UPDATED: Excel values like "Hot" / "DEAD" also accepted (any capitals)
+          clean(String(b.priority || "").trim().toLowerCase(), PRIORITIES, "none"), b.source || "Import", req.user.id,
         ]
       );
       inserted++;
@@ -419,9 +463,11 @@ router.get("/:id/logs", async (req, res) => {
       return res.status(403).json({ error: "This lead is not assigned to you" });
     }
     const [rows] = await pool.query(
-      `SELECT c.*, u.name AS user_name FROM call_logs c
+      // ORIGINAL: `SELECT c.*, u.name AS user_name FROM call_logs c ... ORDER BY c.log_date DESC`
+      // UPDATED: + call date (plain text), newest call first
+      `SELECT c.*, DATE_FORMAT(c.call_date, '%Y-%m-%d') AS call_date, u.name AS user_name FROM call_logs c
        LEFT JOIN users u ON u.id = c.user_id
-       WHERE c.lead_id = ? ORDER BY c.log_date DESC`,
+       WHERE c.lead_id = ? ORDER BY COALESCE(c.call_date, DATE(c.log_date)) DESC, c.log_date DESC, c.id DESC`,
       [req.params.id]
     );
     // ADDED: attach admin replies to each call log (oldest reply first).

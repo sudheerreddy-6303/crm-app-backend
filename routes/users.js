@@ -180,9 +180,17 @@ router.get("/:id/activity", adminOnly, async (req, res) => {
     // Uses the same leadConds/leadParams built above, so the list always
     // matches the card numbers for the selected range.
     const [leads] = await pool.query(
-      `SELECT id, name, primary_phone, first_calling_date, second_calling_date,
-              call_category, quote_sent, order_booked, whatsapp_sent_date,
-              whatsapp_category, calling_remark, next_call_date, priority, updated_at,
+      // ORIGINAL: `SELECT id, name, primary_phone, first_calling_date, second_calling_date,
+      //          call_category, quote_sent, order_booked, whatsapp_sent_date,
+      //          whatsapp_category, calling_remark, next_call_date, priority, updated_at,
+      // FIXED: dates as plain 'YYYY-MM-DD' text (no day shift on India time)
+      `SELECT id, name, primary_phone,
+              DATE_FORMAT(first_calling_date, '%Y-%m-%d') AS first_calling_date,
+              DATE_FORMAT(second_calling_date, '%Y-%m-%d') AS second_calling_date,
+              call_category, quote_sent, order_booked,
+              DATE_FORMAT(whatsapp_sent_date, '%Y-%m-%d') AS whatsapp_sent_date,
+              whatsapp_category, calling_remark,
+              DATE_FORMAT(next_call_date, '%Y-%m-%d') AS next_call_date, priority, updated_at,
               call_remark_1, call_remark_2, call_remark_3,
               whatsapp_sent_1, whatsapp_sent_2, whatsapp_sent_3,
               DATE_FORMAT(whatsapp_date_1, '%Y-%m-%d') AS whatsapp_date_1,

@@ -3,6 +3,8 @@
 // pool queries, search + type/status filters, pagination).
 const express = require("express");
 const { pool } = require("../db");
+// ADDED: State / City / Location from the forms
+const { saveAddress } = require("../utils/saveAddress");
 const { auth, adminOnly } = require("../middleware/auth");
 // ADDED: live "Data in CRM (count)" = leads in the CRM for each project
 const { attachLeadCounts, countForName } = require("../utils/projectLeadCounts");
@@ -97,7 +99,9 @@ router.get("/", async (req, res) => {
       `SELECT COUNT(*) AS total FROM projects p ${whereSql}`, params
     );
     const [rows] = await pool.query(
-      `SELECT p.*, u.name AS created_by_name
+      // ORIGINAL: `SELECT p.*, u.name AS created_by_name
+      // FIXED: last calling date as plain text (no day shift on India time)
+      `SELECT p.*, DATE_FORMAT(p.last_calling_date, '%Y-%m-%d') AS last_calling_date, u.name AS created_by_name
        FROM projects p LEFT JOIN users u ON u.id = p.created_by
        ${whereSql}
        ORDER BY p.created_at DESC
@@ -178,6 +182,7 @@ router.post("/", async (req, res) => {
 
     // ADDED: sales executive 1 phone + sales executive 2
     await saveSalesExecs(result.insertId, req.body);
+    await saveAddress("projects", result.insertId, req.body); // ADDED: state / city
 
     res.status(201).json({ id: result.insertId, message: "Project added" });
   } catch (err) {
@@ -213,6 +218,7 @@ router.put("/:id", async (req, res) => {
 
     // ADDED: sales executive 1 phone + sales executive 2
     await saveSalesExecs(req.params.id, req.body);
+    await saveAddress("projects", req.params.id, req.body); // ADDED: state / city
 
     res.json({ message: "Project updated" });
   } catch (err) {
@@ -222,6 +228,62 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE /api/projects/:id  - admin only
+// ADDED: "Image of project" - upload / view / remove (JPG, PNG or WEBP, max 5 MB).
+// The image is sent as-is (not JSON). Same rules as editing a project.
+const IMG_TYPES = { "image/jpeg": true, "image/png": true, "image/webp": true };
+const IMG_MAX = 5 * 1024 * 1024;
+router.post("/:id/image", express.raw({ type: () => true, limit: "6mb" }), async (req, res) => {
+  try {
+    const mime = String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase();
+    if (!IMG_TYPES[mime]) return res.status(400).json({ error: "Image must be a JPG, PNG or WEBP file" });
+    const data = req.body;
+    if (!Buffer.isBuffer(data) || data.length === 0) return res.status(400).json({ error: "No image received" });
+    if (data.length > IMG_MAX) return res.status(400).json({ error: "Image is too big - maximum 5 MB" });
+    let name = "Project image";
+    try { name = decodeURIComponent(String(req.headers["x-file-name"] || name)); } catch { /* keep default */ }
+    name = name.replace(/[\r\n"\\/]/g, "_").slice(0, 200) || "Project image";
+    const [[proj]] = await pool.query("SELECT id FROM projects WHERE id = ?", [req.params.id]);
+    if (!proj) return res.status(404).json({ error: "Project not found" });
+    await pool.query(
+      `INSERT INTO project_images (project_id, file_name, mime_type, size_bytes, data, uploaded_by)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE file_name = VALUES(file_name), mime_type = VALUES(mime_type),
+         size_bytes = VALUES(size_bytes), data = VALUES(data), uploaded_by = VALUES(uploaded_by),
+         uploaded_at = CURRENT_TIMESTAMP`,
+      [req.params.id, name, mime, data.length, data, req.user.id]
+    );
+    await pool.query("UPDATE projects SET image_name = ? WHERE id = ?", [name, req.params.id]);
+    res.json({ message: "Project image uploaded", image_name: name });
+  } catch (err) {
+    if (err && err.type === "entity.too.large") return res.status(400).json({ error: "Image is too big - maximum 5 MB" });
+    console.error("Project image upload error:", err);
+    res.status(500).json({ error: "Failed to upload the image" });
+  }
+});
+router.get("/:id/image", async (req, res) => {
+  try {
+    const [[img]] = await pool.query("SELECT file_name, mime_type, data FROM project_images WHERE project_id = ?", [req.params.id]);
+    if (!img) return res.status(404).json({ error: "No image for this project" });
+    res.setHeader("Content-Type", img.mime_type);
+    res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(img.file_name)}"`);
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.send(img.data);
+  } catch (err) {
+    console.error("Project image load error:", err);
+    res.status(500).json({ error: "Failed to load the image" });
+  }
+});
+router.delete("/:id/image", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM project_images WHERE project_id = ?", [req.params.id]);
+    await pool.query("UPDATE projects SET image_name = '' WHERE id = ?", [req.params.id]);
+    res.json({ message: "Project image removed" });
+  } catch (err) {
+    console.error("Project image remove error:", err);
+    res.status(500).json({ error: "Failed to remove the image" });
+  }
+});
+
 router.delete("/:id", adminOnly, async (req, res) => {
   try {
     const [result] = await pool.query("DELETE FROM projects WHERE id = ?", [req.params.id]);

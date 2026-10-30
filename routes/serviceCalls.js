@@ -3,6 +3,8 @@
 // pool queries, search + category filters, pagination).
 const express = require("express");
 const { pool } = require("../db");
+// ADDED: State / City / Location from the forms
+const { saveAddress } = require("../utils/saveAddress");
 const { auth, adminOnly } = require("../middleware/auth");
 
 const router = express.Router();
@@ -17,6 +19,8 @@ const SERVICE_CATEGORIES = [
   "Glass Work", "Marbles Work", "Tele Callers", "Sales Executive",
   "Interior Designer", "Builders", "False Ceiling", "AC Repair",
   "Printer Repair", "Chair Repair", "Site Managers",
+  // ADDED
+  "Architects",
 ];
 
 // ADDED: categories added from the app (table service_call_categories).
@@ -341,6 +345,7 @@ router.post("/", async (req, res) => {
     await saveDesignerDetails(result.insertId, req.body);
     // ADDED: follow-ups for all other categories
     await saveFollowups(result.insertId, req.body);
+    await saveAddress("service_calls", result.insertId, req.body); // ADDED: state
 
     res.status(201).json({ id: result.insertId, message: "Service call added" });
   } catch (err) {
@@ -384,6 +389,7 @@ router.put("/:id", async (req, res) => {
     await saveDesignerDetails(req.params.id, req.body);
     // ADDED: follow-ups for all other categories
     await saveFollowups(req.params.id, req.body);
+    await saveAddress("service_calls", req.params.id, req.body); // ADDED: state
 
     res.json({ message: "Service call updated" });
   } catch (err) {
