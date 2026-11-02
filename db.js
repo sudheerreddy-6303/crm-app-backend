@@ -194,6 +194,11 @@ async function initDb() {
       ["followup3_date", "DATE NULL"],
       ["followup3_remark", "TEXT NULL"],
       ["cv_name", "VARCHAR(255) DEFAULT ''"],
+      // ADDED: Interior Designer - interested to attend interview (Yes/No),
+      // selected for job (Yes/No) and status
+      ["interview_interested", "VARCHAR(3) DEFAULT ''"],
+      ["selected_for_job", "VARCHAR(3) DEFAULT ''"],
+      ["designer_status", "VARCHAR(30) DEFAULT ''"],
       // ADDED: service call assigned to a telecaller (admin assigns) + when / by whom
       ["assigned_to", "INT NULL"],
       ["assigned_at", "DATETIME NULL"],

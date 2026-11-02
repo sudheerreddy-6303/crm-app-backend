@@ -97,7 +97,17 @@ async function saveDesignerDetails(id, b) {
       id,
     ]
   );
+  // ADDED: interested to attend interview, selected for job, status (separate update,
+  // so the statement above stays unchanged)
+  const yn = (v) => (["Yes", "No"].includes(v) ? v : "");
+  const sets = []; const vals = [];
+  if ("interview_interested" in b) { sets.push("interview_interested = ?"); vals.push(yn(b.interview_interested)); }
+  if ("selected_for_job" in b) { sets.push("selected_for_job = ?"); vals.push(yn(b.selected_for_job)); }
+  if ("designer_status" in b) { sets.push("designer_status = ?"); vals.push(DESIGNER_STATUSES.includes(b.designer_status) ? b.designer_status : ""); }
+  if (sets.length) await pool.query(`UPDATE service_calls SET ${sets.join(", ")} WHERE id = ?`, [...vals, id]);
 }
+// ADDED: Interior Designer "Status" options (same list in ServiceCallModal.jsx)
+const DESIGNER_STATUSES = ["Interested", "Not interested", "Offered job", "Currently working"];
 
 // ADDED: 3 follow-ups (date + remark) for EVERY other category.
 // Interior Designers keep saving them through saveDesignerDetails (unchanged).
@@ -158,7 +168,10 @@ router.get("/", async (req, res) => {
     // UPDATED: + location and experience filters
     // ADDED: + assigned filter ("" = all, "none" = not assigned, "me" = mine, or a telecaller id)
     // ORIGINAL (full line): const { search = "", category = "", location = "", experience = "", page = 1, limit = 50 } = req.query;
-    const { search = "", category = "", location = "", experience = "", assigned = "", page = 1, limit = 50 } = req.query;
+    // ORIGINAL: const { search = "", category = "", location = "", experience = "", assigned = "", page = 1, limit = 50 } = req.query;
+    // UPDATED: + Interior Designer filters (interested to attend interview, selected for job, status)
+    const { search = "", category = "", location = "", experience = "", assigned = "", page = 1, limit = 50,
+            interview_interested = "", selected_for_job = "", designer_status = "" } = req.query;
 
     const where = [];
     const params = [];
@@ -191,6 +204,10 @@ router.get("/", async (req, res) => {
       where.push("s.assigned_to = ?");
       params.push(Number(assigned));
     }
+    // ADDED: Interior Designer filters
+    if (["Yes", "No"].includes(interview_interested)) { where.push("s.interview_interested = ?"); params.push(interview_interested); }
+    if (["Yes", "No"].includes(selected_for_job)) { where.push("s.selected_for_job = ?"); params.push(selected_for_job); }
+    if (DESIGNER_STATUSES.includes(designer_status)) { where.push("s.designer_status = ?"); params.push(designer_status); }
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const lim = Math.min(Number(limit) || 50, 200);
