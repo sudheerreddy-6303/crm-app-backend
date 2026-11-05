@@ -477,6 +477,20 @@ async function initDb() {
       }
     }
 
+    // ADDED: Store Promotions - phone numbers per store (Suchitra / Nanakramguda).
+    // UNIQUE (store, phone): the same number can never be saved twice for a store.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS store_promo_numbers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        store VARCHAR(30) NOT NULL,
+        phone VARCHAR(15) NOT NULL,
+        created_by INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_store_phone (store, phone),
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
     // ADDED: State / City / Location in every form (Telangana / Andhra Pradesh).
     // Only the columns a table does not have yet are added; existing data untouched.
     const addressCols = [

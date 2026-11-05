@@ -19,6 +19,8 @@ const businessPartnerRoutes = require("./routes/businessPartners");
 const notificationRoutes = require("./routes/notifications");
 // ADDED: WhatsApp requests (Meta / Bulk WhatsApp form + history)
 const whatsappRoutes = require("./routes/whatsapp");
+// ADDED: Store Promotions (Suchitra / Nanakramguda phone numbers)
+const storePromotionRoutes = require("./routes/storePromotions");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -69,6 +71,8 @@ app.use("/api/business-partners", businessPartnerRoutes);
 app.use("/api/notifications", notificationRoutes);
 // ADDED: WhatsApp requests
 app.use("/api/whatsapp", whatsappRoutes);
+// ADDED: Store Promotions
+app.use("/api/store-promotions", storePromotionRoutes);
 
 const PORT = process.env.PORT || 5000;
 
