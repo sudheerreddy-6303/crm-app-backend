@@ -21,6 +21,10 @@ const notificationRoutes = require("./routes/notifications");
 const whatsappRoutes = require("./routes/whatsapp");
 // ADDED: Store Promotions (Suchitra / Nanakramguda phone numbers)
 const storePromotionRoutes = require("./routes/storePromotions");
+// ADDED: Client Brief form (CRM side + public link the client opens)
+const path = require("path");
+const clientBriefRoutes = require("./routes/clientBriefs");
+const publicBriefRoutes = require("./routes/publicBriefs");
 
 const app = express();
 // ORIGINAL: app.use(cors());  (allowed every origin)
@@ -73,6 +77,16 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/whatsapp", whatsappRoutes);
 // ADDED: Store Promotions
 app.use("/api/store-promotions", storePromotionRoutes);
+// ADDED: Client Brief - CRM side (login needed)
+app.use("/api/client-briefs", clientBriefRoutes);
+// ADDED: Client Brief - public side used by the form (only the secret link gives access)
+app.use("/api/public/briefs", publicBriefRoutes);
+// ADDED: the Client Brief form page itself. The link sent on WhatsApp is
+// https://<this backend>/brief/<token>; the page and its pictures are in
+// backend/public/client-brief.
+const BRIEF_DIR = path.join(__dirname, "public", "client-brief");
+app.use("/brief-assets", express.static(BRIEF_DIR, { maxAge: "7d" }));
+app.get("/brief/:token", (req, res) => res.sendFile(path.join(BRIEF_DIR, "index.html")));
 
 const PORT = process.env.PORT || 5000;
 

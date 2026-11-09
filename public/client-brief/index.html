@@ -1,0 +1,522 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Interior Design Client Brief · Deeraj Interiors</title>
+<meta name="description" content="Deeraj Interiors - tell us about your home. Takes about 15 minutes.">
+<meta property="og:title" content="Interior Design Client Brief · Deeraj Interiors">
+<meta property="og:description" content="Tell us about your home - it takes about 15 minutes.">
+<meta property="og:image" content="/brief-assets/img/hero.jpg">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,700;1,700&family=Arimo:wght@400;600;700&family=Caveat:wght@500&display=swap">
+<style>
+/* Layout: one continuous paper sheet that mirrors the printed brief section by section; brown running header stays on top */
+:root{
+  --terra:#c4673f; --sage:#6f917a; --blue:#5e8ca0; --mustard:#d4a24c; --plum:#8c4b63; --brown:#8a5a3b;
+  --ink:#2b2420; --muted:#7d6f63; --label:#9a8b7c;
+  --line:#cdbba6; --soft-line:#eadbc8; --cream:#fbf6ef; --paper:#ffffff; --field:#fffdfa; --surround:#efe8de;
+  --yes:#5a9e74; --maybe:#e0aa3e; --no:#d9745f;
+  --serif:"Tinos","Times New Roman",Times,serif;
+  --sans:"Arimo",Helvetica,Arial,sans-serif;
+  --script:"Caveat","Segoe Script",cursive;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{background:var(--surround);color:var(--ink);font:13px/1.45 var(--sans);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--brown)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--brown);color:#fff}
+.topbar-in{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:9px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.topbar b{font-size:11px;letter-spacing:.06em}
+.dots{display:flex;gap:6px}
+.dots i{width:9px;height:9px;border-radius:50%;display:block}
+.outer{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.sheet{max-width:900px;margin:0 auto;background:var(--paper);box-shadow:0 2px 18px rgba(90,60,30,.12);border-radius:4px;padding:clamp(18px,5vw,48px) clamp(14px,5vw,48px) 28px;display:flex;flex-direction:column;gap:14px}
+@media (max-width:520px){.outer{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));padding-block:10px 24px}}
+
+/* cover */
+.cover-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.eyebrow{color:var(--terra);font-weight:700;font-size:11px;letter-spacing:.22em}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(34px,7vw,52px);line-height:1;margin:10px 0 0;color:var(--ink)}
+h1 em{display:block;color:var(--brown);font-style:italic}
+.cover-top .dots i{width:14px;height:14px}
+.lede{color:var(--muted);margin:2px 0 0;max-width:62ch;font-size:13.5px}
+.hero{width:100%;max-width:100%;border-radius:16px;display:block;aspect-ratio:524/347;object-fit:cover}
+.tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tip{display:flex;gap:10px;align-items:center;background:var(--cream);border:1px solid var(--soft-line);border-radius:10px;padding:12px}
+.tip b{display:block;font-size:13px}
+.tip small{display:block;color:var(--muted);font-size:11px;line-height:1.35}
+.journey-h{font-weight:700;font-size:11px;letter-spacing:.06em;margin-top:4px}
+.journey{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.journey::before{content:"";position:absolute;left:5%;right:5%;top:19px;border-top:2px dotted var(--line)}
+.journey a{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--ink);font-weight:700;font-size:11px;text-align:center}
+.journey a .ic{width:38px;height:38px}
+.journey a sup{position:absolute;top:-4px;left:calc(50% + 10px);width:16px;height:16px;border-radius:50%;background:#fff;border:1.3px solid var(--line);font-size:9px;display:grid;place-items:center;line-height:1;color:var(--ink)}
+.journey a.done .ic{box-shadow:0 0 0 3px #fff,0 0 0 4.5px var(--terra)}
+.journey a:focus-visible{outline:2px solid var(--terra);outline-offset:3px;border-radius:6px}
+
+/* icon circle */
+.ic{width:34px;height:34px;border-radius:50%;background:var(--c,var(--terra));color:#fff;display:grid;place-items:center;flex:none}
+.ic svg{width:52%;height:52%}
+
+/* section header */
+.sec{display:flex;align-items:center;gap:12px;background:var(--cream);border:1px solid var(--soft-line);border-radius:999px;padding:6px 6px 6px 7px;margin-top:14px;scroll-margin-top:60px}
+.sec .num{width:32px;height:32px;border-radius:50%;background:var(--brown);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.sec h2{font-family:var(--serif);font-weight:700;font-size:clamp(19px,3.4vw,25px);margin:0;flex:1;min-width:0;line-height:1.1;text-wrap:balance}
+.sec .hint{font-style:italic;color:var(--label);font-size:11px}
+@media (max-width:620px){.sec .hint{display:none}}
+
+/* question label */
+.q{font-weight:700;font-size:12.5px;margin:4px 0 -6px}
+
+/* text fields */
+.row{display:grid;gap:10px}
+.fld{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:7px;background:var(--field);padding:5px 8px 4px;min-width:0;cursor:text}
+.fld span{font-size:9px;letter-spacing:.05em;color:var(--label);text-transform:uppercase;line-height:1.2}
+.fld input{border:0;background:transparent;font:14px var(--sans);color:var(--ink);padding:5px 0 3px;outline:none;width:100%;min-width:0;color-scheme:light}
+.fld:focus-within{border-color:var(--terra);box-shadow:0 0 0 2px rgba(196,103,63,.15)}
+.fld.sign{min-height:66px}
+.fld.sign input{font:26px var(--script);padding-top:8px}
+
+/* option cards */
+.cards{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:9px}
+.opt{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;border:1px solid var(--line);border-radius:9px;background:#fff;padding:16px 8px 12px;min-height:84px;cursor:pointer;font-weight:700;font-size:11.5px;line-height:1.25;transition:border-color .15s,background .15s;min-width:0}
+.opt input,.pill input,.pic input,.tc input,.confirm input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.cb{position:absolute;top:7px;right:8px;width:11px;height:11px;border:1.4px solid var(--brown);border-radius:3px;background:#fff;display:grid;place-items:center}
+.cb svg{width:9px;height:9px;opacity:0}
+input:checked~.cb{background:var(--brown);border-color:var(--brown)}
+input:checked~.cb svg{opacity:1}
+.opt:has(input:checked){border-color:var(--terra);background:#fdf5ef;box-shadow:inset 0 0 0 1px var(--terra)}
+.opt:has(input:focus-visible),.pill:has(input:focus-visible),.pic:has(input:focus-visible),.tc:has(input:focus-visible),.confirm:has(input:focus-visible){outline:2px solid var(--terra);outline-offset:2px}
+.opt.tall{min-height:96px}
+
+/* pills */
+.pills{display:flex;flex-wrap:wrap;gap:7px}
+.pill{position:relative;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 8px;background:#fff;cursor:pointer;font-size:12px}
+.pill .cb{position:static}
+.pill:has(input[type=checkbox]:checked){border-color:var(--terra);background:#fdf5ef}
+.pill .inl{border:0;border-bottom:1px solid var(--line);background:transparent;font:12px var(--sans);width:150px;max-width:44vw;padding:1px 2px;outline:none;color:var(--ink)}
+.pill .inl:focus{border-bottom-color:var(--terra)}
+
+/* style pictures */
+.pics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pic{position:relative;border:1px solid var(--line);border-radius:9px;overflow:hidden;cursor:pointer;background:#fff;min-width:0}
+.pic img{display:block;width:100%;aspect-ratio:167/78.6;max-width:100%;object-fit:cover}
+.pic .cap{display:flex;align-items:center;gap:7px;padding:5px 9px;font-weight:700;font-size:11.5px;border-top:1px solid var(--soft-line)}
+.pic .cb{position:static}
+.pic:has(input:checked){border-color:var(--terra);box-shadow:inset 0 0 0 1px var(--terra)}
+.pic:has(input:checked) .cap{background:#fdf5ef}
+
+/* colour mood */
+.sw{display:flex;gap:5px;justify-content:center}
+.sw i{width:15px;height:15px;border-radius:50%;border:1px solid rgba(0,0,0,.1);display:block}
+.opt.mood{min-height:64px;padding:14px 8px 9px}
+
+/* finish & flooring swatches */
+.tile{width:74%;max-width:84px;height:34px;border-radius:5px;flex:none}
+.matte{background:#bfa892}
+.gloss{background:linear-gradient(135deg,#2f4253 0 38%,#9fb4c4 44%,#43596b 50%,#2f4253 62%,#93a9ba 70%,#2f4253 76%)}
+.grain{background:repeating-linear-gradient(0deg,#b98758 0 3px,#a8764a 3px 5px,#c49464 5px 8px)}
+.veneer{background:repeating-linear-gradient(90deg,#dcb980 0 4px,#c9a265 4px 5px,#e3c38c 5px 9px,#cfa96d 9px 10px)}
+.acrylic{background:linear-gradient(90deg,#c4673f 0 50%,#d98762 50% 70%,#c4673f 70%)}
+.duco{background:radial-gradient(ellipse 30% 40% at 70% 70%,#a7c0ad,transparent 70%),#6f917a}
+.vitri{background:linear-gradient(#cfc8bd,#cfc8bd) 50% 0/1px 100% no-repeat,linear-gradient(#cfc8bd,#cfc8bd) 0 50%/100% 1px no-repeat,#ece8e1;border:1px solid #d6cfc4}
+.marble{background:linear-gradient(115deg,transparent 46%,#b9b4ac 47%,transparent 49%),linear-gradient(60deg,transparent 60%,#c8c3bb 61%,transparent 63%),linear-gradient(150deg,transparent 30%,#cfcac2 31%,transparent 32.5%),#f6f4f0;border:1px solid #ddd8cf}
+.wood{background:linear-gradient(90deg,transparent 49%,#7a4e30 49% 51%,transparent 51%) 0 0/50% 50%,linear-gradient(90deg,transparent 24%,#7a4e30 24% 26%,transparent 26%,transparent 74%,#7a4e30 74% 76%,transparent 76%) 0 100%/100% 50% no-repeat,linear-gradient(#7a4e30,#7a4e30) 0 50%/100% 1px no-repeat,#a3683f}
+
+/* coins & gems */
+.coins{height:38px;display:flex;align-items:flex-end;justify-content:center}
+.gems{display:flex;gap:3px;color:var(--blue);height:24px;align-items:center}
+.gems svg{width:20px;height:20px}
+
+/* photos & lined notes */
+.inspo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr);gap:14px;align-items:start}
+.polaroid{position:relative;background:#fff;border:1px solid #e4dccf;box-shadow:0 2px 6px rgba(80,55,30,.15);padding:10px 10px 6px;cursor:pointer;display:block;min-width:0}
+.polaroid:nth-child(1){transform:rotate(-1.6deg)}
+.polaroid:nth-child(2){transform:rotate(.8deg)}
+.polaroid:nth-child(3){transform:rotate(-.6deg)}
+.polaroid::before{content:"";position:absolute;top:-7px;left:50%;width:42%;height:13px;transform:translateX(-50%) rotate(1deg);background:rgba(232,196,98,.75)}
+.polaroid .area{position:relative;aspect-ratio:4/3;max-width:100%;border:1.2px dashed #b9a893;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--label);font-size:10.5px;overflow:hidden}
+.polaroid .area img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.polaroid input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.polaroid figcaption{font-style:italic;color:var(--muted);text-align:center;font-size:12px;padding-top:5px;font-family:var(--serif)}
+.polaroid:focus-within{outline:2px solid var(--terra);outline-offset:3px}
+.stack{display:flex;flex-direction:column;gap:10px;min-width:0}
+.lined{border:1px solid var(--line);border-radius:9px;background:var(--field);padding:10px 12px 8px;min-width:0}
+.lined .lh{display:flex;align-items:center;gap:8px;font-weight:700;font-size:12px}
+.lined .lh .ic{width:20px;height:20px}
+.lined textarea{display:block;width:100%;border:0;outline:none;resize:vertical;font:13.5px/26px var(--sans);color:var(--ink);padding:0 4px;margin-top:4px;
+  background:linear-gradient(transparent 25px,#d9c6ad 25px 26px) 0 0/100% 26px local;min-height:calc(26px * var(--r,3) + 2px)}
+.lined:focus-within{border-color:var(--terra)}
+@media (max-width:720px){.inspo{grid-template-columns:repeat(3,minmax(0,1fr))}.inspo .stack{grid-column:1/-1}}
+
+/* room tables */
+.tipbox{background:var(--cream);border:1px solid var(--soft-line);border-radius:9px;padding:10px 14px;font-size:12px;color:#4a3f37}
+.room{border:1px solid var(--soft-line);border-radius:9px;overflow:hidden}
+.rhead,.ritem{display:grid;grid-template-columns:minmax(0,1fr) 50px 64px 44px minmax(0,1fr);align-items:center;column-gap:6px}
+.rhead{background:var(--c);color:#fff;padding:6px 12px 6px 8px;font-weight:700;font-size:11px;min-height:38px}
+.rhead .t{display:flex;align-items:center;gap:9px;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase}
+.rhead .t .ic{background:#fff;color:var(--c);width:24px;height:24px}
+.rhead .h{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10px}
+.rhead .h::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--d)}
+.rhead .n{font-size:10.5px;padding-left:4px}
+.ritem{padding:3px 12px 3px 14px;font-size:12px;min-height:30px}
+.ritem:nth-child(even){background:var(--cream)}
+.tc{position:relative;display:grid;place-items:center;height:26px;cursor:pointer}
+.tc .box{width:12px;height:12px;border:1.5px solid var(--k);border-radius:3.5px;display:grid;place-items:center;background:#fff}
+.tc .box svg{width:10px;height:10px;opacity:0}
+.tc input:checked+.box{background:var(--k)}
+.tc input:checked+.box svg{opacity:1}
+.ritem .note{border:0;border-bottom:1px solid #d9c6ad;background:transparent;font:12.5px var(--sans);color:var(--ink);padding:3px 2px;outline:none;width:100%;min-width:0}
+.ritem .note:focus{border-bottom-color:var(--terra)}
+@media (max-width:620px){
+  .rhead{grid-template-columns:minmax(0,1fr) 40px 52px 36px}
+  .rhead .n{display:none}
+  .ritem{grid-template-columns:minmax(0,1fr) 40px 52px 36px;padding-block:6px}
+  .ritem .note{grid-column:1/-1;margin-top:2px}
+}
+
+/* confirm & thanks */
+.confirm{position:relative;display:flex;align-items:center;gap:10px;background:var(--cream);border:1px solid var(--soft-line);border-radius:9px;padding:9px 12px;cursor:pointer;font-style:italic;font-size:12px}
+.confirm .ic{width:24px;height:24px;background:#fff;border:1.5px solid var(--sage);color:var(--sage)}
+.confirm .ic svg{opacity:0}
+.confirm:has(input:checked) .ic{background:var(--sage);color:#fff}
+.confirm:has(input:checked) .ic svg{opacity:1}
+.thanks{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:center;background:var(--brown);border-radius:18px;padding:16px;color:#fff;margin-top:12px}
+.thanks img{width:100%;max-width:100%;border-radius:12px;display:block}
+.thanks h3{font-family:var(--serif);font-style:italic;font-size:clamp(28px,5vw,40px);margin:0 0 8px}
+.thanks p{margin:0;font-size:13px;max-width:30ch;line-height:1.5}
+@media (max-width:560px){.thanks{grid-template-columns:1fr;text-align:center}.thanks p{margin:0 auto}}
+
+/* actions */
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button.btn{font:700 13px var(--sans);border-radius:8px;padding:11px 18px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink)}
+button.btn.pri{background:var(--terra);border-color:var(--terra);color:#fff}
+button.btn:focus-visible{outline:2px solid var(--terra);outline-offset:2px}
+.status{font-size:12px;color:var(--muted);align-self:center}
+#summary{width:100%;min-height:300px;font:12.5px/1.55 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--field);color:var(--ink)}
+.foot{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:8px;margin-top:16px;font-size:10.5px;color:var(--muted)}
+
+/* responsive grids */
+@media (max-width:720px){
+  .cards{grid-template-columns:repeat(min(var(--n),3),minmax(0,1fr))}
+  .tips{grid-template-columns:1fr}
+  .journey{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:14px}
+  .journey::before{display:none}
+  .row{grid-template-columns:1fr 1fr!important}
+  .row>.full{grid-column:1/-1}
+}
+@media (max-width:460px){
+  .cards{grid-template-columns:repeat(min(var(--n),2),minmax(0,1fr))}
+  .pics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .row{grid-template-columns:1fr!important}
+  .cover-top .dots{display:none}
+}
+/* ADDED (TeleCRM): popup, submit state, invalid link page */
+.pop-bg{position:fixed;inset:0;z-index:100;background:rgba(43,36,32,.45);display:grid;place-items:center;padding:16px}
+.pop{background:#fff;border-radius:14px;max-width:400px;width:100%;padding:22px 20px 18px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.25);border-top:5px solid var(--sage)}
+.pop.err{border-top-color:var(--no)}
+.pop .pi{width:46px;height:46px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;color:#fff;background:var(--sage);font-size:24px;font-weight:700}
+.pop.err .pi{background:var(--no)}
+.pop h4{font-family:var(--serif);font-size:22px;margin:0 0 6px}
+.pop p{margin:0 0 16px;color:#4a3f37;font-size:13.5px;line-height:1.5;white-space:pre-line}
+.pop button{font:700 13px var(--sans);border-radius:8px;padding:10px 26px;border:0;background:var(--brown);color:#fff;cursor:pointer}
+button.btn[disabled]{opacity:.65;cursor:wait}
+.badlink{max-width:520px;margin:12vh auto;background:#fff;border-radius:14px;padding:28px 22px;text-align:center;box-shadow:0 2px 18px rgba(90,60,30,.12)}
+.badlink h2{font-family:var(--serif);margin:0 0 8px}
+.topbar .bno{font-size:11px;opacity:.9;letter-spacing:.04em}
+.sent-note{background:#eef5f0;border:1px solid #cfe2d5;border-radius:9px;padding:9px 12px;font-size:12.5px;color:#35553f}
+</style>
+
+<div class="topbar"><div class="topbar-in"><b>INTERIOR DESIGN CLIENT BRIEF</b><span class="bno" id="bno"></span><div class="dots"><i style="background:var(--sage)"></i><i style="background:var(--mustard)"></i><i style="background:var(--terra)"></i></div></div></div>
+<div class="outer"><form class="sheet" id="brief" autocomplete="on" novalidate></form></div>
+
+<script>
+const ICONS={"archive": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\" /> <path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\" /> <path d=\"M10 12h4\" /> </svg>", "armchair": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3\" /> <path d=\"M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z\" /> <path d=\"M5 18v2\" /> <path d=\"M19 18v2\" /> </svg>", "ban": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" /> </svg>", "bath": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5\" /> <line x1=\"10\" x2=\"8\" y1=\"5\" y2=\"7\" /> <line x1=\"2\" x2=\"22\" y1=\"12\" y2=\"12\" /> <line x1=\"7\" x2=\"7\" y1=\"19\" y2=\"21\" /> <line x1=\"17\" x2=\"17\" y1=\"19\" y2=\"21\" /> </svg>", "bed-double": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8\" /> <path d=\"M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4\" /> <path d=\"M12 4v6\" /> <path d=\"M2 18h20\" /> </svg>", "bed-single": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M3 20v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8\" /> <path d=\"M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4\" /> <path d=\"M3 18h18\" /> </svg>", "box": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\" /> <path d=\"m3.3 7 8.7 5 8.7-5\" /> <path d=\"M12 22V12\" /> </svg>", "building": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"16\" height=\"20\" x=\"4\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M9 22v-4h6v4\" /> <path d=\"M8 6h.01\" /> <path d=\"M16 6h.01\" /> <path d=\"M12 6h.01\" /> <path d=\"M12 10h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 10h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 10h.01\" /> <path d=\"M8 14h.01\" /> </svg>", "building-2": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z\" /> <path d=\"M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2\" /> <path d=\"M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2\" /> <path d=\"M10 6h4\" /> <path d=\"M10 10h4\" /> <path d=\"M10 14h4\" /> <path d=\"M10 18h4\" /> </svg>", "calendar": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> </svg>", "calendar-check": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"m9 16 2 2 4-4\" /> </svg>", "calendar-days": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" /> </svg>", "calendar-range": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M16 2v4\" /> <path d=\"M3 10h18\" /> <path d=\"M8 2v4\" /> <path d=\"M17 14h-6\" /> <path d=\"M13 18H7\" /> <path d=\"M7 14h.01\" /> <path d=\"M17 18h.01\" /> </svg>", "calendar-x": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"m14 14-4 4\" /> <path d=\"m10 14 4 4\" /> </svg>", "check": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 6 9 17l-5-5\" /> </svg>", "chef-hat": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z\" /> <line x1=\"6\" x2=\"18\" y1=\"17\" y2=\"17\" /> </svg>", "clipboard-list": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\" /> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\" /> <path d=\"M12 11h4\" /> <path d=\"M12 16h4\" /> <path d=\"M8 11h.01\" /> <path d=\"M8 16h.01\" /> </svg>", "coins": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"8\" cy=\"8\" r=\"6\" /> <path d=\"M18.09 10.37A6 6 0 1 1 10.34 18\" /> <path d=\"M7 6h1v4\" /> <path d=\"m16.71 13.88.7.71-2.82 2.82\" /> </svg>", "compass": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"10\" /> <polygon points=\"16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76\" /> </svg>", "construction": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect x=\"2\" y=\"6\" width=\"20\" height=\"8\" rx=\"1\" /> <path d=\"M17 14v7\" /> <path d=\"M7 14v7\" /> <path d=\"M17 3v3\" /> <path d=\"M7 3v3\" /> <path d=\"M10 14 2.3 6.3\" /> <path d=\"m14 6 7.7 7.7\" /> <path d=\"m8 6 8 8\" /> </svg>", "cooking-pot": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M2 12h20\" /> <path d=\"M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\" /> <path d=\"m4 8 16-4\" /> <path d=\"m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8\" /> </svg>", "door-closed": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14\" /> <path d=\"M2 20h20\" /> <path d=\"M14 12v.01\" /> </svg>", "door-open": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M13 4h3a2 2 0 0 1 2 2v14\" /> <path d=\"M2 20h3\" /> <path d=\"M13 20h9\" /> <path d=\"M10 12v.01\" /> <path d=\"M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z\" /> </svg>", "drumstick": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M15.45 15.4c-2.13.65-4.3.32-5.7-1.1-2.29-2.27-1.76-6.5 1.17-9.42 2.93-2.93 7.15-3.46 9.43-1.18 1.41 1.41 1.74 3.57 1.1 5.71-1.4-.51-3.26-.02-4.64 1.36-1.38 1.38-1.87 3.23-1.36 4.63z\" /> <path d=\"m11.25 15.6-2.16 2.16a2.5 2.5 0 1 1-4.56 1.73 2.49 2.49 0 0 1-1.41-4.24 2.5 2.5 0 0 1 3.14-.32l2.16-2.16\" /> </svg>", "file": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /> </svg>", "flame": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\" /> </svg>", "flower-2": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1\" /> <circle cx=\"12\" cy=\"8\" r=\"2\" /> <path d=\"M12 10v12\" /> <path d=\"M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z\" /> <path d=\"M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z\" /> </svg>", "gem": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M6 3h12l4 6-10 13L2 9Z\" /> <path d=\"M11 3 8 9l4 13 4-13-3-6\" /> <path d=\"M2 9h20\" /> </svg>", "heart": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\" /> </svg>", "home": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" /> <polyline points=\"9 22 9 12 15 12 15 22\" /> </svg>", "key": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\" /> <path d=\"m21 2-9.6 9.6\" /> <path d=\"m15.5 7.5 3 3L22 7l-3-3\" /> </svg>", "lamp-ceiling": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M12 2v5\" /> <path d=\"M6 7h12l4 9H2l4-9Z\" /> <path d=\"M9.17 16a3 3 0 1 0 5.66 0\" /> </svg>", "lamp-desk": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m14 5-3 3 2 7 8-8-7-2Z\" /> <path d=\"m14 5-3 3-3-3 3-3 3 3Z\" /> <path d=\"M9.5 6.5 4 12l3 6\" /> <path d=\"M3 22v-2c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2H3Z\" /> </svg>", "landmark": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <line x1=\"3\" x2=\"21\" y1=\"22\" y2=\"22\" /> <line x1=\"6\" x2=\"6\" y1=\"18\" y2=\"11\" /> <line x1=\"10\" x2=\"10\" y1=\"18\" y2=\"11\" /> <line x1=\"14\" x2=\"14\" y1=\"18\" y2=\"11\" /> <line x1=\"18\" x2=\"18\" y1=\"18\" y2=\"11\" /> <polygon points=\"12 2 20 7 4 7\" /> </svg>", "layers": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z\" /> <path d=\"m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65\" /> <path d=\"m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65\" /> </svg>", "layout-grid": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" /> </svg>", "lightbulb": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" /> </svg>", "mail": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\" /> <path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\" /> </svg>", "map": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <polygon points=\"3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21\" /> <line x1=\"9\" x2=\"9\" y1=\"3\" y2=\"18\" /> <line x1=\"15\" x2=\"15\" y1=\"6\" y2=\"21\" /> </svg>", "map-pin": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" /> </svg>", "message-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" /> </svg>", "paint-roller": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"16\" height=\"6\" x=\"2\" y=\"2\" rx=\"2\" /> <path d=\"M10 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2\" /> <rect width=\"4\" height=\"6\" x=\"8\" y=\"16\" rx=\"1\" /> </svg>", "palette": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\" /> </svg>", "pencil": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\" /> <path d=\"m15 5 4 4\" /> </svg>", "person-standing": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"5\" r=\"1\" /> <path d=\"m9 20 3-6 3 6\" /> <path d=\"m6 8 6 2 6-2\" /> <path d=\"M12 10v4\" /> </svg>", "pill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z\" /> <path d=\"m8.5 8.5 7 7\" /> </svg>", "refrigerator": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6Z\" /> <path d=\"M5 10h14\" /> <path d=\"M15 7v6\" /> </svg>", "ruler": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\" /> <path d=\"m14.5 12.5 2-2\" /> <path d=\"m11.5 9.5 2-2\" /> <path d=\"m8.5 6.5 2-2\" /> <path d=\"m17.5 15.5 2-2\" /> </svg>", "sheet": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" /> </svg>", "smartphone": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" /> </svg>", "smile": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M8 14s1.5 2 4 2 4-2 4-2\" /> <line x1=\"9\" x2=\"9.01\" y1=\"9\" y2=\"9\" /> <line x1=\"15\" x2=\"15.01\" y1=\"9\" y2=\"9\" /> </svg>", "sofa": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3\" /> <path d=\"M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z\" /> <path d=\"M4 18v2\" /> <path d=\"M20 18v2\" /> <path d=\"M12 4v9\" /> </svg>", "store": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7\" /> </svg>", "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" /> </svg>", "text": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M17 6.1H3\" /> <path d=\"M21 12.1H3\" /> <path d=\"M15.1 18H3\" /> </svg>", "user": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /> <circle cx=\"12\" cy=\"7\" r=\"4\" /> </svg>", "users": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" /> </svg>", "users-round": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M18 21a8 8 0 0 0-16 0\" /> <circle cx=\"10\" cy=\"8\" r=\"5\" /> <path d=\"M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3\" /> </svg>", "utensils": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2\" /> <path d=\"M7 2v20\" /> <path d=\"M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7\" /> </svg>", "warehouse": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z\" /> <path d=\"M6 18h12\" /> <path d=\"M6 14h12\" /> <rect width=\"12\" height=\"12\" x=\"6\" y=\"10\" /> </svg>", "x": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" /> </svg>"};
+const C={T:"var(--terra)",S:"var(--sage)",B:"var(--blue)",M:"var(--mustard)",P:"var(--plum)",Br:"var(--brown)"};
+const CYCLE=["T","S","B","M","P","Br"];
+const ROOMCYCLE=["T","S","B","P","M","Br"];
+const svg=n=>ICONS[n]||"";
+const TICK='<svg viewBox="0 0 10 10"><path d="M2 5.2l2 2 4-4.4" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let N=0;const nid=p=>p+(++N);
+const ic=(i,c,cls="")=>`<span class="ic ${cls}" style="--c:${C[c]||c}">${svg(i)}</span>`;
+
+function fields(cols,list){
+  return `<div class="row" style="grid-template-columns:${cols}">${list.map(([l,t="text",cls=""])=>{const id=nid("t");
+    return `<label class="fld ${cls}" for="${id}"><span>${esc(l)}</span><input id="${id}" name="${id}" type="${t}" data-label="${esc(l)}"${t==="number"?' inputmode="numeric" min="0"':""}></label>`}).join("")}</div>`;
+}
+function cards(q,items,opts={}){
+  const g=nid("g");
+  return `<div class="q">${esc(q)}</div><div class="cards" data-q="${esc(q)}" style="--n:${opts.n||items.length}">${items.map((it,k)=>{
+    const [label,vis,col]=it;const id=`${g}_${k}`;
+    let v;
+    if(opts.kind==="mood")v=`<span class="sw">${vis.map(c=>`<i style="background:${c}"></i>`).join("")}</span>`;
+    else if(opts.kind==="tile"&&typeof vis==="string"&&vis.startsWith("."))v=`<span class="tile ${vis.slice(1)}"></span>`;
+    else if(opts.kind==="coins")v=`<span class="coins">${coins(vis)}</span>`;
+    else if(opts.kind==="gems")v=`<span class="gems">${svg("gem").repeat(vis)}</span>`;
+    else v=ic(vis,col||CYCLE[k%6]);
+    return `<label class="opt ${opts.kind==="mood"?"mood":""} ${opts.tall?"tall":""}"><input type="checkbox" id="${id}" name="${g}" value="${esc(label)}"><span class="cb">${TICK}</span>${v}<span>${esc(label)}</span></label>`}).join("")}</div>`;
+}
+function coins(k){
+  const stacks=[[3],[5],[8],[11],[7,13],[9,13,7]][k-1];let x=0,parts=[];
+  const w=26,gap=4,total=stacks.length*w+(stacks.length-1)*gap;
+  stacks.forEach(h=>{for(let j=0;j<h;j++){const y=44-j*3;parts.push(`<rect x="${x}" y="${y-3}" width="${w}" height="3" rx="1.5" fill="${j%2?"#c8953e":"#d4a24c"}"/>`)}
+    parts.push(`<ellipse cx="${x+w/2}" cy="${44-h*3}" rx="${w/2}" ry="2" fill="#e8c06e"/>`);x+=w+gap});
+  return `<svg viewBox="0 -2 ${total} 48" width="${total}" height="38" aria-hidden="true">${parts.join("")}</svg>`;
+}
+function pills(q,items){
+  const g=nid("g");
+  return `<div class="q">${esc(q)}</div><div class="pills" data-q="${esc(q)}">${items.map((l,k)=>{
+    const id=`${g}_${k}`;
+    if(l.endsWith(":")){const tid=nid("t");return `<label class="pill"><input type="checkbox" id="${id}" name="${g}" value="${esc(l.slice(0,-1))}"><span class="cb">${TICK}</span>${esc(l)}<input class="inl" type="text" id="${tid}" data-label="${esc(q+" – "+l.slice(0,-1))}" aria-label="${esc(l)}"></label>`}
+    return `<label class="pill"><input type="checkbox" id="${id}" name="${g}" value="${esc(l)}"><span class="cb">${TICK}</span>${esc(l)}</label>`}).join("")}</div>`;
+}
+function lined(prompt,rows,icon="pencil",col="S"){
+  const id=nid("a");
+  return `<div class="lined"><label class="lh" for="${id}">${ic(icon,col)}${esc(prompt)}</label><textarea id="${id}" name="${id}" data-label="${esc(prompt)}" style="--r:${rows}" rows="${rows}"></textarea></div>`;
+}
+function sec(n,title,icon,hint=""){
+  return `<div class="sec" id="step-${n}"><span class="num">${n}</span><h2>${esc(title)}</h2>${hint?`<span class="hint">${esc(hint)}</span>`:""}${ic(icon,"T")}</div>`;
+}
+function room(name,icon,k,items){
+  const c=C[ROOMCYCLE[k%6]];const r=nid("r");
+  return `<div class="room" data-room="${esc(name)}" style="--c:${c}"><div class="rhead"><span class="t">${ic(icon,c)}${esc(name)}</span>
+   <span class="h" style="--d:#8fd0a6">YES</span><span class="h" style="--d:#f2c768">MAYBE</span><span class="h" style="--d:#f09a85">NO</span><span class="n">Size / material / notes</span></div>
+   ${items.map((it,i)=>{const id=`${r}_${i}`;return `<div class="ritem" data-item="${esc(it)}"><span>${esc(it)}</span>${
+     [["Yes","--yes"],["Maybe","--maybe"],["No","--no"]].map(([v,k])=>`<label class="tc" style="--k:var(${k})"><input type="checkbox" id="${id}_${v}" name="${id}" value="${v}" data-excl aria-label="${esc(name+" – "+it+": "+v)}"><span class="box">${TICK}</span></label>`).join("")
+   }<input class="note" type="text" id="${id}_n" aria-label="${esc(it)} – size / material / notes" placeholder=" "></div>`}).join("")}</div>`;
+}
+
+const STEPS=[["About you","user"],["Site","map-pin"],["Style","palette"],["Rooms","sofa"],["Storage","archive"],["Budget","coins"],["Timeline","calendar"],["Notes","pencil"]];
+
+const html=[
+`<div class="cover-top"><div><div class="eyebrow">YOUR HOME · YOUR STORY</div><h1>Interior Design<em>Client Brief</em></h1></div>
+ <div class="dots">${["P","B","S","M","T"].map(c=>`<i style="background:${C[c]}"></i>`).join("")}</div></div>
+ <p class="lede">Your answers help us plan the right design, budget and timeline for your home.<br>It takes about 15 minutes. Tick what fits, write what matters.</p>
+ <img class="hero" src="/brief-assets/img/hero.jpg" alt="Illustrated living room with a terracotta sofa, plants and a sunny window">`,
+fields("1.4fr .8fr .8fr",[["Designer / Studio","text","full"],["Date","date"],["Brief no."]]),
+`<div class="tips">
+  <div class="tip">${ic("check","S")}<div><b>Tick the boxes</b><small>Pick the pictures and options that feel like you.</small></div></div>
+  <div class="tip">${ic("pencil","T")}<div><b>Write a few words</b><small>Sizes, names, dates. Blank is fine if unsure.</small></div></div>
+  <div class="tip">${ic("heart","P")}<div><b>Show us what you love</b><small>Add photos or Pinterest links in Section 3.</small></div></div>
+ </div>
+ <div class="journey-h">YOUR JOURNEY IN 8 STEPS</div>
+ <nav class="journey" aria-label="Sections">${STEPS.map(([s,i],k)=>`<a href="#step-${k+1}" id="j${k}">${ic(i,CYCLE[k%6])}<sup>${k+1}</sup>${s}</a>`).join("")}</nav>`,
+
+sec(1,"About You","user"),
+fields("1fr 1fr",[["Full name"],["Phone / WhatsApp","tel"]]),
+fields("1fr 1fr",[["Email","email"],["Best time to call"]]),
+fields("1fr",[["Current address"]]),
+cards("Who decides?",[["Only me","user"],["Me + spouse / partner","users"],["Family together","users-round"],["Parents / elders","person-standing"],["Other","pencil"]]),
+fields("1fr",[["Name of other decision maker(s)"]]),
+
+sec(2,"Project Location & Site Details","map-pin"),
+fields("1fr",[["Project address / society name"]]),
+fields("2fr 1fr",[["City & area / landmark","text","full"],["Floor no.","number"]]),
+cards("Property type",[["Apartment","building-2"],["Independent house / villa","home"],["Row house","warehouse"],["Office","building"],["Shop / showroom","store"],["Other","pencil"]]),
+pills("Configuration",["2 BHK","3 BHK","4 BHK+","Duplex"]),
+fields("1.5fr 1.3fr 1fr",[["Carpet / built-up area (sq ft)","number","full"],["Ceiling height (ft)","number"],["No. of balconies","number"]]),
+cards("Site status",[["Under construction","construction"],["Ready, not occupied","key"],["Occupied (renovation)","sofa"],["Rented","door-open"]],{n:4}),
+fields("1fr 1fr",[["Possession / handover date","date"],["Date site is open for measurement","date"]]),
+cards("Project scope",[["Full home","home"],["Only some rooms","layout-grid"],["Kitchen only","cooking-pot"],["Wardrobes only","door-closed"],["Furniture only","armchair"],["Renovation + new","paint-roller"]]),
+cards("Floor plan available?",[["Yes, will share","map","T"],["No, need site measurement","ruler","S"],["Builder plan only","clipboard-list","B"]]),
+
+sec(3,"Style & Look You Like","palette","Tick the pictures that feel like home"),
+(()=>{const g=nid("g");const S=[["Modern","modern"],["Contemporary","contemporary"],["Minimal","minimal"],["Traditional / Indian","traditional"],["Luxury / classic","luxury"],["Scandinavian","scandinavian"],["Industrial","industrial"],["Boho","boho"],["Japandi","japandi"]];
+  return `<div class="q">Style</div><div class="pics" data-q="Style">${S.map(([l,f],k)=>`<label class="pic"><input type="checkbox" id="${g}_${k}" name="${g}" value="${esc(l)}"><img src="/brief-assets/img/${f}.jpg" alt="${esc(l)} room illustration" loading="lazy"><span class="cap"><span class="cb">${TICK}</span>${esc(l)}</span></label>`).join("")}</div>
+  <div class="pills" data-q="Style"><label class="pill"><input type="checkbox" id="${g}_9" name="${g}" value="Other"><span class="cb">${TICK}</span>Other:<input class="inl" type="text" id="${nid("t")}" data-label="Style – Other" aria-label="Other style"></label></div>`})(),
+cards("Colour mood",[["Light & airy",["#ffffff","#f4efe4","#e1e9ea","#cfdcde","#f1e4cf"]],["Warm & earthy",["#c4673f","#cf8656","#b0734b","#9f6444","#8a5a3b"]],["Dark & rich",["#25262e","#4a2434","#3b3a2a","#5a4527","#333333"]],
+  ["Bright & colourful",["#e2582c","#f1b52a","#3f9fdc","#45a35a","#d64f9a"]],["Neutral / white-grey",["#f5f5f3","#d9d8d4","#b3b1ac","#8c8a85","#5d5c59"]],["Wood tones",["#e2c49c","#c69c6c","#a87c50","#8a5a3b","#6c4327"]]],{kind:"mood",n:3}),
+fields("1fr 1fr",[["Colours you love"],["Colours you do not want"]]),
+cards("Finish preference",[["Matte",".matte"],["Glossy / high gloss",".gloss"],["Wood grain / laminate",".grain"],["Veneer",".veneer"],["Acrylic",".acrylic"],["Duco / PU paint",".duco"]],{kind:"tile"}),
+cards("Flooring",[["Vitrified tiles",".vitri"],["Marble",".marble"],["Wooden / laminate",".wood"],["Keep existing","home","S"],["Other","pencil","T"]],{kind:"tile"}),
+cards("Lighting",[["Warm yellow","lightbulb","M"],["Cool white","lightbulb","B"],["Mixed / layered","layers","P"],["Lots of natural light","sun","T"],["Cove & profile lights","lamp-ceiling","Br"]]),
+cards("Vastu / religious",[["Vastu is important","compass","T"],["Vastu somewhat","compass","S"],["Not needed","ban","B"],["Pooja room / corner needed","flame","M"]]),
+`<div class="q">Inspiration: share Pinterest / Instagram links, magazine pages or photos you like. Anything you DISLIKE?</div>
+ <div class="inspo">${[["Living","heart","T"],["Kitchen","map-pin","S"],["Bedroom","palette","B"]].map(([l,i,c])=>`<label class="polaroid"><div class="area" data-photo="${l}">${ic(i,c)}<span>Add photo here</span><input type="file" accept="image/*" aria-label="Add ${l} inspiration photo"></div><figcaption>${l}</figcaption></label>`).join("")}
+ <div class="stack">${lined("Pinterest / Instagram links",2,"map-pin","B")}${lined("Things I DISLIKE",2,"x","T")}</div></div>`,
+
+sec(4,"Rooms, Units & Cabinets Needed","sofa"),
+`<div class="tipbox">Tick YES / MAYBE / NO for each. Write size, material or any detail on the right. Skip rooms that do not exist.</div>`,
+...[["Living room","sofa",["TV unit / entertainment wall","Feature wall / paneling","Shoe rack / entry storage","Crockery / display / showcase","Console / foyer table","Bar / mini bar unit","Sofa / seating (custom)"]],
+ ["Dining","utensils",["Dining table (seats: ___ )","Crockery cabinet / buffet","Wash basin with mirror","Folding / extendable table"]],
+ ["Kitchen","cooking-pot",["Base cabinets","Wall cabinets","Loft storage","Tall unit / pantry","Breakfast counter","Pull-outs / baskets / corner units","Chimney / hob / oven built-in","Utility / wash area"]],
+ ["Master bedroom","bed-double",["Bed with storage","Wardrobe: sliding / hinged / walk-in","Dresser / vanity","Bedside tables","Headboard wall panel","TV unit","Loft above wardrobe","Study / reading corner"]],
+ ["Kids room","smile",["Bed / bunk bed","Wardrobe","Study table & shelves","Toy / book storage","Play or reading nook"]],
+ ["Guest room","bed-single",["Bed / sofa-cum-bed","Wardrobe","Study / work desk","TV unit"]],
+ ["Pooja / prayer","flame",["Pooja mandir unit (wall / floor)","Storage below for puja items","Backlit panel / jaali"]],
+ ["Study / work from home","lamp-desk",["Desk with cabinet","Bookshelf / open shelves","Printer & files storage","Second desk for another person"]],
+ ["Bathrooms","bath",["Vanity cabinet","Mirror cabinet","Overhead / niche storage","Shower partition","Laundry hamper unit"]],
+ ["Balcony / utility","flower-2",["Seating / swing","Planters / green wall","Washing machine cabinet","Clothes drying system","Storage cabinet"]],
+ ["Extras","paint-roller",["False ceiling","Wallpaper / texture paint","Curtains / blinds","Electrical rework","Plumbing / civil changes","Smart home / automation","Decor, art, rugs, plants"]]
+].map(([n,i,its],k)=>room(n,i,k,its)),
+
+sec(5,"Storage, Appliances & Existing Items","archive"),
+cards("Storage need",[["Very high","archive","T"],["Moderate","archive","M"],["Minimal","archive","S"]]),
+cards("Kitchen type",[["Open","cooking-pot","B"],["Closed","cooking-pot","P"],["Semi-open","cooking-pot","Br"]]),
+cards("Cooking",[["Heavy Indian cooking","flame","T"],["Light cooking","chef-hat","S"],["Non-veg","drumstick","P"],["Separate dry kitchen / wet kitchen","refrigerator","B"]]),
+fields("1fr",[["Appliances to fit (fridge, dishwasher, oven, etc.)"]]),
+lined("Existing furniture / items you want to KEEP or reuse:",3),
+
+sec(6,"Budget","coins"),
+cards("Rough budget (Rs.)",[["Below 5 lakh",1],["5 - 10 lakh",2],["10 - 20 lakh",3],["20 - 35 lakh",4],["35 - 60 lakh",5],["60 lakh+",6]],{kind:"coins"}),
+fields("1.4fr 1fr 1.4fr",[["Exact budget, if fixed (Rs.)","number","full"],["Flexibility (+/- %)","number"],["Budget includes furniture & decor?"]]),
+cards("Quality level",[["Economy / basic",1],["Standard",2],["Premium",3],["Luxury",4]],{kind:"gems"}),
+cards("Where to spend more?",[["Kitchen","cooking-pot","T"],["Wardrobes","door-closed","S"],["Living room","sofa","B"],["Bedrooms","bed-double","P"],["Lighting","lightbulb","M"],["Furniture","armchair","Br"],["Decor","palette","T"],["Other","pencil","S"]],{n:8}),
+cards("Payment",[["Own funds","coins","M"],["Home loan / bank","landmark","B"],["Stage-wise payments","calendar-days","S"]]),
+
+sec(7,"Timeline","calendar"),
+fields("1fr 1.2fr 1.2fr",[["Preferred start date","date"],["Move-in / completion deadline","date"],["Fixed event? (wedding, festival...)","text","full"]]),
+cards("How strict?",[["Fixed, cannot move","calendar-x","T"],["Flexible by few weeks","calendar-range","M"],["Flexible","calendar-check","S"]]),
+pills("Will anyone stay at site during work?",["Yes","No","Site will be vacant"]),
+pills("Site access",["Keys with me","Keys with security","I will be present","Contact person:"]),
+cards("Update me via",[["WhatsApp","message-circle","S"],["Phone call","smartphone","B"],["Email","mail","P"],["Site visits","map-pin","T"],["Weekly meeting","users","M"]]),
+
+sec(8,"Final Notes","pencil"),
+lined("Biggest problems in your current home that this design should fix:",5),
+lined("Anything else we should know? (budget worries, family preferences, must-haves, deal-breakers)",5),
+`<label class="confirm"><input type="checkbox" id="confirm" name="confirm" value="Confirmed"><span class="ic">${svg("check")}</span>I confirm the information above is correct to the best of my knowledge. Details may change after the site visit.</label>`,
+fields("1.3fr .7fr 1.3fr",[["Client signature","text","sign full"],["Date","date","sign"],["Designer signature","text","sign"]]),
+`<div class="thanks"><img src="/brief-assets/img/hero.jpg" alt="" loading="lazy"><div><h3>Thank you!</h3><p>We cannot wait to turn your ideas into a home you love. Our team will call you after reading this brief.</p></div></div>
+ <div class="actions"><button type="button" class="btn pri" id="bSubmit">Submit brief</button><button type="submit" class="btn" id="bReview">Review my answers</button><button type="button" class="btn" id="bCopy">Copy answers</button><button type="button" class="btn" id="bClear">Clear form</button><span class="status" id="status">Your answers are saved as a draft on this device.</span></div>
+ <textarea id="summary" readonly hidden aria-label="Summary of your answers"></textarea>
+ <div class="foot"><span>Interior Design Client Brief &nbsp;|&nbsp; Tick the boxes that apply, write clearly, leave blank if not sure.</span></div>`
+];
+const form=document.getElementById("brief");
+form.innerHTML=html.join("");
+
+/* exclusive Yes/Maybe/No */
+form.addEventListener("change",e=>{const t=e.target;if(t.matches("[data-excl]")&&t.checked)form.querySelectorAll(`input[name="${t.name}"]`).forEach(o=>{if(o!==t)o.checked=false})});
+/* tapping inside an inline "Other:" text should tick its pill */
+form.querySelectorAll(".pill .inl").forEach(inp=>{inp.addEventListener("click",e=>e.preventDefault());inp.addEventListener("input",()=>{const cb=inp.parentElement.querySelector("input[type=checkbox]");if(inp.value&&!cb.checked){cb.checked=true;save()}})});
+/* photos */
+/* ORIGINAL (kept for reference):
+form.querySelectorAll("[data-photo] input[type=file]").forEach(f=>f.addEventListener("change",()=>{const file=f.files[0];if(!file)return;const rd=new FileReader();
+  rd.onload=()=>{const a=f.parentElement;let im=a.querySelector("img");if(!im){im=document.createElement("img");im.alt=a.dataset.photo+" inspiration photo";a.insertBefore(im,f)}im.src=rd.result};rd.readAsDataURL(file)}));
+   UPDATED: the photo is made smaller (max 1400px, JPEG) so it sends fast on mobile data */
+function shrink(dataUrl){return new Promise(res=>{const im=new Image();im.onload=()=>{const M=1400;let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,M/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
+  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);res(c.toDataURL("image/jpeg",0.82))};im.onerror=()=>res(null);im.src=dataUrl})}
+form.querySelectorAll("[data-photo] input[type=file]").forEach(f=>f.addEventListener("change",()=>{const file=f.files[0];if(!file)return;
+  if(!/^image\//.test(file.type||"image/")){popup("err","Not a photo","Please choose a photo (JPG or PNG).");f.value="";return}
+  const rd=new FileReader();
+  rd.onload=async()=>{const small=await shrink(rd.result);if(!small){popup("err","Photo not added","This photo could not be opened. Please choose another photo.");f.value="";return}
+    const a=f.parentElement;let im=a.querySelector("img");if(!im){im=document.createElement("img");im.alt=a.dataset.photo+" inspiration photo";a.insertBefore(im,f)}im.src=small;im.dataset.fresh="1"};rd.readAsDataURL(file)}));
+
+/* draft */
+/* ADDED (TeleCRM): each link has its own token -> its own draft on this device */
+const TOKEN=(location.pathname.match(/\/brief\/([a-f0-9]+)/i)||[])[1]||new URLSearchParams(location.search).get("t")||"";
+const API="/api/public/briefs/"+TOKEN;
+/* ORIGINAL: const KEY="di-client-brief-native-v1"; */
+const KEY="di-client-brief-native-v1-"+TOKEN;
+function save(){const d={};form.querySelectorAll("input,textarea").forEach(el=>{if(!el.id||el.type==="file"||el.id==="summary")return;if(el.type==="checkbox"){if(el.checked)d[el.id]=1}else if(el.value)d[el.id]=el.value});
+  try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}progress()}
+function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}if(!d)return;
+  Object.entries(d).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==="checkbox")el.checked=true;else el.value=v})}
+function progress(){for(let k=1;k<=STEPS.length;k++){const s=document.getElementById("step-"+k);let el=s.nextElementSibling,on=false;
+  while(el&&!el.classList.contains("sec")){if([...el.querySelectorAll("input,textarea")].some(i=>i.type==="checkbox"?i.checked:(i.type!=="file"&&i.id!=="summary"&&i.value))){on=true;break}el=el.nextElementSibling}
+  document.getElementById("j"+(k-1)).classList.toggle("done",on)}}
+load();progress();
+form.addEventListener("input",save);form.addEventListener("change",save);
+
+/* summary */
+function summary(){
+  const out=["INTERIOR DESIGN CLIENT BRIEF"];let cur=null;
+  [...form.children].forEach(el=>{
+    if(el.classList.contains("sec")){cur=el.querySelector(".num").textContent+". "+el.querySelector("h2").textContent.toUpperCase();return}
+    const lines=[];const q=s=>[...(el.matches(s)?[el]:[]),...el.querySelectorAll(s)];
+    q(".fld input").forEach(i=>{if(i.value)lines.push(`${i.dataset.label}: ${i.value}`)});
+    q("[data-q]").forEach(g=>{const v=[...g.querySelectorAll("input[type=checkbox]:checked")].map(c=>{const t=c.parentElement.querySelector(".inl");return t&&t.value?`${c.value} (${t.value})`:c.value});if(v.length)lines.push(`${g.dataset.q}: ${v.join(", ")}`)});
+    q("textarea[data-label]").forEach(t=>{if(t.value)lines.push(`${t.dataset.label} ${t.value.replace(/\n+/g," / ")}`)});
+    q(".room").forEach(r=>{const rows=[];r.querySelectorAll(".ritem").forEach(it=>{const c=it.querySelector("input:checked");const n=it.querySelector(".note").value;if(c||n)rows.push(`   - ${it.dataset.item}: ${c?c.value:"—"}${n?" ("+n+")":""}`)});if(rows.length)lines.push(r.dataset.room+":",...rows)});
+    q("#confirm").forEach(c=>{if(c.checked)lines.push("Client confirmed the information: Yes")});
+    const ph=q("[data-photo] img").map(i=>i.parentElement.dataset.photo);if(ph.length)lines.push("Photos added: "+ph.join(", "));
+    if(lines.length){if(cur){out.push("",cur);cur=null}out.push(...lines)}
+  });
+  return out.join("\n");
+}
+const status=document.getElementById("status");
+const say=t=>{status.textContent=t;clearTimeout(say.t);say.t=setTimeout(()=>status.textContent="Your answers are saved as a draft on this device.",2600)};
+const showSum=()=>{const s=document.getElementById("summary");s.value=summary();s.hidden=false;return s};
+form.addEventListener("submit",e=>{e.preventDefault();showSum().scrollIntoView({block:"center"})});
+document.getElementById("bCopy").addEventListener("click",()=>{const s=showSum();navigator.clipboard.writeText(s.value).then(()=>say("Answers copied. Paste them into WhatsApp or email.")).catch(()=>{s.focus();s.select();say("Press Ctrl+C (or Copy) to copy the selected answers.")})});
+let armed=false;
+document.getElementById("bClear").addEventListener("click",e=>{const b=e.currentTarget;
+  if(!armed){armed=true;b.textContent="Tap again to clear everything";setTimeout(()=>{armed=false;b.textContent="Clear form"},3500);return}
+  armed=false;b.textContent="Clear form";form.reset();form.querySelectorAll("[data-photo] img").forEach(i=>i.remove());form.querySelectorAll("[data-photo] input[type=file]").forEach(f=>{f.value=""});
+  try{localStorage.removeItem(KEY)}catch(e){}document.getElementById("summary").hidden=true;progress();say("Form cleared.")});
+
+/* ===== ADDED (TeleCRM): send the brief to Deeraj Interiors ===== */
+function popup(type,title,text,after){
+  const bg=document.createElement("div");bg.className="pop-bg";
+  bg.innerHTML=`<div class="pop ${type==="err"?"err":""}" role="dialog" aria-modal="true"><div class="pi">${type==="err"?"!":"&#10003;"}</div><h4></h4><p></p><button type="button">OK</button></div>`;
+  bg.querySelector("h4").textContent=title;bg.querySelector("p").textContent=text;
+  const close=()=>{bg.remove();if(after)after()};
+  bg.querySelector("button").addEventListener("click",close);bg.addEventListener("click",e=>{if(e.target===bg)close()});
+  document.body.appendChild(bg);bg.querySelector("button").focus();
+}
+const byLabel=l=>[...form.querySelectorAll("[data-label]")].find(i=>i.dataset.label===l);
+const val=l=>{const i=byLabel(l);return i?i.value.trim():""};
+const picked=q=>{const g=[...form.querySelectorAll("[data-q]")].filter(x=>x.dataset.q===q);return g.flatMap(x=>[...x.querySelectorAll("input[type=checkbox]:checked")].map(c=>{const t=c.parentElement.querySelector(".inl");return t&&t.value?`${c.value} (${t.value})`:c.value})).join(", ")};
+function setIfEmpty(l,v){const i=byLabel(l);if(i&&!i.value&&v){i.value=v}}
+let serverPhotos=[];
+/* the same answers as the summary, grouped by section (shown in TeleCRM) */
+function structured(){
+  const out=[];let cur={section:"Brief details",items:[]};
+  const push=(q,a)=>{if(a!==""&&a!=null)cur.items.push({q,a:String(a)})};
+  [...form.children].forEach(el=>{
+    if(el.classList.contains("sec")){if(cur.items.length)out.push(cur);cur={section:el.querySelector(".num").textContent+". "+el.querySelector("h2").textContent,items:[]};return}
+    const q=s=>[...(el.matches(s)?[el]:[]),...el.querySelectorAll(s)];
+    q(".fld input").forEach(i=>push(i.dataset.label,i.value.trim()));
+    q("[data-q]").forEach(g=>{const v=[...g.querySelectorAll("input[type=checkbox]:checked")].map(c=>{const t=c.parentElement.querySelector(".inl");return t&&t.value?`${c.value} (${t.value})`:c.value});if(v.length)push(g.dataset.q,v.join(", "))});
+    q("textarea[data-label]").forEach(t=>push(t.dataset.label.replace(/:$/,""),t.value.trim()));
+    q(".room").forEach(r=>r.querySelectorAll(".ritem").forEach(it=>{const c=it.querySelector("input:checked");const n=it.querySelector(".note").value.trim();if(c||n)push(`${r.dataset.room} – ${it.dataset.item}`,`${c?c.value:"—"}${n?" ("+n+")":""}`)}));
+    q("#confirm").forEach(c=>{if(c.checked)push("Client confirmed the information","Yes")});
+    const ph=q("[data-photo] img").map(i=>i.parentElement.dataset.photo);if(ph.length)push("Photos added",ph.join(", "));
+  });
+  if(cur.items.length)out.push(cur);return out;
+}
+function rawState(){const d={};form.querySelectorAll("input,textarea").forEach(el=>{if(!el.id||el.type==="file"||el.id==="summary")return;if(el.type==="checkbox"){if(el.checked)d[el.id]=1}else if(el.value)d[el.id]=el.value});return d}
+function applyRaw(d){form.reset();Object.entries(d||{}).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==="checkbox")el.checked=true;else el.value=v})}
+function showPhotos(slots){serverPhotos=slots||[];serverPhotos.forEach(slot=>{const a=form.querySelector(`[data-photo="${slot}"]`);if(!a||a.querySelector("img"))return;
+  const im=document.createElement("img");im.alt=slot+" inspiration photo";im.src=API+"/photos/"+encodeURIComponent(slot)+"?v="+Date.now();a.insertBefore(im,a.querySelector("input[type=file]"))})}
+function badLink(msg){document.querySelector(".outer").innerHTML=`<div class="badlink"><h2>Link not valid</h2><p></p></div>`;document.querySelector(".badlink p").textContent=msg}
+const sb=document.getElementById("bSubmit");
+function markSent(again){sb.textContent="Update my brief";
+  let n=document.getElementById("sentNote");if(!n){n=document.createElement("div");n.id="sentNote";n.className="sent-note";form.querySelector(".actions").before(n)}
+  n.textContent=again?"Your brief was sent to Deeraj Interiors. You can change anything and tap “Update my brief”.":"Your brief was sent to Deeraj Interiors. You can change anything and tap “Update my brief”."}
+async function init(){
+  if(!TOKEN){badLink("This link is not complete. Please open the full link sent by Deeraj Interiors on WhatsApp.");return}
+  let d;try{const r=await fetch(API);d=await r.json();if(!r.ok){badLink(d.error||"This link is not valid.");return}}catch(e){say("Could not reach Deeraj Interiors - check your internet.");return}
+  document.getElementById("bno").textContent=d.brief_no;
+  let hasDraft=false;try{hasDraft=!!localStorage.getItem(KEY)}catch(e){}
+  if(!hasDraft&&d.raw)applyRaw(d.raw);
+  setIfEmpty("Designer / Studio","Deeraj Interiors");setIfEmpty("Brief no.",d.brief_no);
+  const today=new Date();const iso=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const firstDate=[...form.querySelectorAll('.fld input[type=date]')].find(i=>i.dataset.label==="Date");if(firstDate&&!firstDate.value)firstDate.value=iso;
+  setIfEmpty("Full name",d.client_name);setIfEmpty("Phone / WhatsApp",d.phone);
+  showPhotos(d.photos);if(d.submitted)markSent(true);progress();
+}
+sb.addEventListener("click",async()=>{
+  if(!val("Full name")){popup("err","Your name is missing","Please write your full name in Section 1 (About You).",()=>byLabel("Full name").focus());return}
+  if(val("Phone / WhatsApp").replace(/\D/g,"").length<10){popup("err","Phone number is missing","Please write your 10-digit phone / WhatsApp number in Section 1 (About You).",()=>byLabel("Phone / WhatsApp").focus());return}
+  if(!document.getElementById("confirm").checked){popup("err","Please confirm","Please tick “I confirm the information above is correct” in Section 8 (Final Notes) before sending.",()=>document.getElementById("confirm").closest("label").scrollIntoView({block:"center"}));return}
+  const photos={};["Living","Kitchen","Bedroom"].forEach(slot=>{const a=form.querySelector(`[data-photo="${slot}"]`);const im=a&&a.querySelector("img");
+    if(im&&im.dataset.fresh&&im.src.startsWith("data:"))photos[slot]=im.src;else if(!im&&serverPhotos.includes(slot))photos[slot]=null});
+  const body={raw:rawState(),answers:structured(),summary:summary(),photos,
+    key:{name:val("Full name"),phone:val("Phone / WhatsApp"),email:val("Email"),city_area:val("City & area / landmark"),property_type:picked("Property type"),configuration:picked("Configuration"),
+         budget:[picked("Rough budget (Rs.)"),val("Exact budget, if fixed (Rs.)")?"Rs. "+val("Exact budget, if fixed (Rs.)"):""].filter(Boolean).join(" / ")}};
+  const label=sb.textContent;sb.disabled=true;sb.textContent="Sending...";
+  try{const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    let d={};try{d=await r.json()}catch(e){}
+    if(!r.ok){popup("err","Brief not sent",r.status===413?"The photos are too big to send. Please remove a photo and try again.":(d.error||"Please try again."));sb.textContent=label;return}
+    form.querySelectorAll("[data-photo] img").forEach(i=>delete i.dataset.fresh);
+    serverPhotos=["Living","Kitchen","Bedroom"].filter(s=>form.querySelector(`[data-photo="${s}"] img`));
+    try{localStorage.removeItem(KEY)}catch(e){}
+    markSent(d.again);
+    popup("ok",d.again?"Brief updated":"Thank you!",d.again?"Your changes have been sent to Deeraj Interiors.":"Your brief has been sent to Deeraj Interiors. Our team will call you after reading it.");
+  }catch(e){popup("err","Brief not sent","Could not reach Deeraj Interiors. Please check your internet and try again.");sb.textContent=label}
+  finally{sb.disabled=false}
+});
+init();
+</script>
+
+</body></html>

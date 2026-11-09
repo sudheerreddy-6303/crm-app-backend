@@ -491,6 +491,57 @@ async function initDb() {
       )
     `);
 
+    // ADDED: Client Brief (Interior Design Client Brief form). One row per link
+    // sent to a client: a secret token (the link), who it is for, who created it,
+    // status (sent -> opened -> submitted) and, once the client submits, ALL the
+    // answers: answers_json (section / question / answer list shown in the CRM),
+    // raw_json (every box exactly as filled - reopens the form the same way) and
+    // summary_text (plain text, used for copy / export). A few key answers are
+    // also kept in their own columns for the list and search.
+    // Brand-new tables - created on the next backend start; existing data untouched.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS client_briefs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        token VARCHAR(64) NOT NULL UNIQUE,
+        client_name VARCHAR(150) NOT NULL DEFAULT '',
+        phone VARCHAR(20) NOT NULL DEFAULT '',
+        lead_id INT NULL,
+        created_by INT NULL,
+        status ENUM('sent','opened','submitted') NOT NULL DEFAULT 'sent',
+        opened_at TIMESTAMP NULL,
+        submitted_at TIMESTAMP NULL,
+        submit_count INT NOT NULL DEFAULT 0,
+        filled_name VARCHAR(150) NOT NULL DEFAULT '',
+        filled_phone VARCHAR(30) NOT NULL DEFAULT '',
+        email VARCHAR(150) NOT NULL DEFAULT '',
+        city_area VARCHAR(255) NOT NULL DEFAULT '',
+        property_type VARCHAR(255) NOT NULL DEFAULT '',
+        configuration VARCHAR(255) NOT NULL DEFAULT '',
+        budget VARCHAR(255) NOT NULL DEFAULT '',
+        answers_json LONGTEXT NULL,
+        raw_json LONGTEXT NULL,
+        summary_text LONGTEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+    // ADDED: inspiration photos the client adds in the brief (Living / Kitchen /
+    // Bedroom) - one per slot, replaced if the client submits again.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS client_brief_photos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        brief_id INT NOT NULL,
+        slot VARCHAR(30) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        size_bytes INT NOT NULL,
+        data MEDIUMBLOB NOT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_brief_slot (brief_id, slot),
+        FOREIGN KEY (brief_id) REFERENCES client_briefs(id) ON DELETE CASCADE
+      )
+    `);
+
     // ADDED: State / City / Location in every form (Telangana / Andhra Pradesh).
     // Only the columns a table does not have yet are added; existing data untouched.
     const addressCols = [
