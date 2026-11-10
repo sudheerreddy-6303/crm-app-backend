@@ -36,6 +36,7 @@ function scope(req, where, params) {
 const LIST_COLS = `b.id, b.token, b.client_name, b.phone, b.lead_id, b.created_by, b.status,
   b.submit_count, b.filled_name, b.filled_phone, b.email, b.city_area, b.property_type,
   b.configuration, b.budget,
+  b.state, b.city, b.location,
   UNIX_TIMESTAMP(b.created_at) AS created_ts,
   UNIX_TIMESTAMP(b.opened_at) AS opened_ts,
   UNIX_TIMESTAMP(b.submitted_at) AS submitted_ts,
@@ -133,8 +134,13 @@ router.get("/:id", async (req, res) => {
     let answers = [];
     try { answers = JSON.parse(row.answers_json || "[]"); } catch { answers = []; }
     const [photos] = await pool.query("SELECT slot, size_bytes FROM client_brief_photos WHERE brief_id = ? ORDER BY id", [row.id]);
+    // ADDED: floor plan files the client attached
+    const [files] = await pool.query(
+      "SELECT id, file_name AS name, mime_type AS mime, size_bytes AS size, UNIX_TIMESTAMP(uploaded_at) AS uploaded_ts FROM client_brief_files WHERE brief_id = ? ORDER BY id", [row.id]
+    );
     delete row.answers_json;
-    res.json({ brief: { ...row, brief_no: briefNo(row.id), answers, photos } });
+    // ORIGINAL: res.json({ brief: { ...row, brief_no: briefNo(row.id), answers, photos } });
+    res.json({ brief: { ...row, brief_no: briefNo(row.id), answers, photos, files } });
   } catch (err) {
     console.error("Client brief view error:", err);
     res.status(500).json({ error: "Server error" });
@@ -152,6 +158,22 @@ router.get("/:id/photos/:slot", async (req, res) => {
     res.send(p.data);
   } catch (err) {
     console.error("Client brief photo error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADDED: download / open a floor plan file the client attached
+router.get("/:id/files/:fid", async (req, res) => {
+  try {
+    const row = await findVisible(req, req.params.id);
+    if (!row) return res.status(404).json({ error: "Client brief not found" });
+    const [[f]] = await pool.query("SELECT file_name, mime_type, data FROM client_brief_files WHERE id = ? AND brief_id = ?", [req.params.fid, row.id]);
+    if (!f) return res.status(404).json({ error: "File not found" });
+    res.set("Content-Type", f.mime_type);
+    res.set("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(f.file_name)}`);
+    res.send(f.data);
+  } catch (err) {
+    console.error("Client brief file error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

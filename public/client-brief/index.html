@@ -38,6 +38,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 h1{font-family:var(--serif);font-weight:700;font-size:clamp(34px,7vw,52px);line-height:1;margin:10px 0 0;color:var(--ink)}
 h1 em{display:block;color:var(--brown);font-style:italic}
 .cover-top .dots i{width:14px;height:14px}
+/* ADDED (TeleCRM): Deeraj Interiors logo on the cover */
+.cover-top .brand{display:flex;flex-direction:column;align-items:flex-end;gap:12px;flex:none}
+.cover-top .logo{display:block;width:clamp(160px,24vw,230px);height:auto}
+@media (max-width:620px){.cover-top{flex-direction:column-reverse;gap:14px}.cover-top .brand{flex-direction:row;align-items:center;justify-content:space-between;width:100%}.cover-top .logo{width:170px}}
 .lede{color:var(--muted);margin:2px 0 0;max-width:62ch;font-size:13.5px}
 .hero{width:100%;max-width:100%;border-radius:16px;display:block;aspect-ratio:524/347;object-fit:cover}
 .tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -45,7 +49,9 @@ h1 em{display:block;color:var(--brown);font-style:italic}
 .tip b{display:block;font-size:13px}
 .tip small{display:block;color:var(--muted);font-size:11px;line-height:1.35}
 .journey-h{font-weight:700;font-size:11px;letter-spacing:.06em;margin-top:4px}
-.journey{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+/* ORIGINAL: .journey{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+   UPDATED: 9 steps (Materials added) */
+.journey{position:relative;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
 .journey::before{content:"";position:absolute;left:5%;right:5%;top:19px;border-top:2px dotted var(--line)}
 .journey a{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--ink);font-weight:700;font-size:11px;text-align:center}
 .journey a .ic{width:38px;height:38px}
@@ -104,6 +110,9 @@ input:checked~.cb svg{opacity:1}
 .pic .cb{position:static}
 .pic:has(input:checked){border-color:var(--terra);box-shadow:inset 0 0 0 1px var(--terra)}
 .pic:has(input:checked) .cap{background:#fdf5ef}
+/* ADDED (TeleCRM): fix - the small tick box on a chosen style picture now shows the tick (it was only the border before) */
+.pic:has(input:checked) .cb{background:var(--brown);border-color:var(--brown)}
+.pic:has(input:checked) .cb svg{opacity:1}
 
 /* colour mood */
 .sw{display:flex;gap:5px;justify-content:center}
@@ -210,6 +219,29 @@ button.btn:focus-visible{outline:2px solid var(--terra);outline-offset:2px}
   .row{grid-template-columns:1fr!important}
   .cover-top .dots{display:none}
 }
+/* ADDED (TeleCRM): State / City / Location boxes (Section 2) */
+.fld select{border:0;background:transparent;font:14px var(--sans);color:var(--ink);padding:5px 0 3px;outline:none;width:100%;min-width:0;color-scheme:light;cursor:pointer}
+.fld .lv{display:none!important}
+.fld .lo{display:none}
+.fld .lo.on{display:block}
+.fld select+.lo.on{border-top:1px dashed var(--soft-line);margin-top:2px}
+/* ADDED (TeleCRM): Attach floor plan */
+.fp{display:flex;flex-direction:column;gap:8px}
+.fp-drop{position:relative;display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:9px;background:var(--field);padding:12px 14px;cursor:pointer}
+.fp-drop:hover,.fp-drop:focus-within{border-color:var(--terra);background:#fdf5ef}
+.fp-drop input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.fp-drop b{display:block;font-size:13px}
+.fp-drop small{display:block;color:var(--muted);font-size:11px}
+.fp-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.fp-list li{display:flex;align-items:center;gap:10px;border:1px solid var(--soft-line);background:#fff;border-radius:8px;padding:7px 10px;font-size:12.5px;min-width:0}
+.fp-list li .ic{width:26px;height:26px}
+.fp-list a{color:var(--ink);font-weight:700;text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-list a:hover{color:var(--terra);text-decoration:underline}
+.fp-list .sz{color:var(--muted);font-size:11px;white-space:nowrap}
+.fp-list button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 9px;font:600 11.5px var(--sans);color:var(--no);cursor:pointer}
+.fp-list li.up{color:var(--muted);font-style:italic}
+.fp-none{color:var(--muted);font-size:12px}
+body.view .fp-drop{display:none}
 /* ADDED (TeleCRM): popup, submit state, invalid link page */
 .pop-bg{position:fixed;inset:0;z-index:100;background:rgba(43,36,32,.45);display:grid;place-items:center;padding:16px}
 .pop{background:#fff;border-radius:14px;max-width:400px;width:100%;padding:22px 20px 18px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.25);border-top:5px solid var(--sage)}
@@ -223,12 +255,34 @@ button.btn[disabled]{opacity:.65;cursor:wait}
 .badlink{max-width:520px;margin:12vh auto;background:#fff;border-radius:14px;padding:28px 22px;text-align:center;box-shadow:0 2px 18px rgba(90,60,30,.12)}
 .badlink h2{font-family:var(--serif);margin:0 0 8px}
 .topbar .bno{font-size:11px;opacity:.9;letter-spacing:.04em}
+/* ADDED (TeleCRM): read-only "client answers" view opened from TeleCRM (?view=1) -
+   same design as the form, only what the client filled is shown */
+.vh{display:none!important}
+body.view .outer{padding-block:12px 20px}
+body.view .sheet{gap:12px}
+body.view .opt,body.view .pill,body.view .pic,body.view .tc,body.view .confirm,body.view .polaroid{cursor:default}
+body.view .fld{cursor:default}
+body.view .view-badge{display:inline-block;background:#fff;color:var(--brown);border-radius:999px;padding:2px 10px;font-size:10.5px;font-weight:700;letter-spacing:.05em}
+/* PREVIOUS: body.view .hero{display:none}
+   UPDATED: the picture is hidden only in the "only filled" view (&only=1); the full-form view shows the whole form */
+body.view.only .hero{display:none}
+/* ADDED: full-form view - make the client's choices stand out */
+body.view:not(.only) .opt:has(input:checked),body.view:not(.only) .pic:has(input:checked){background:#fbe3d5;box-shadow:inset 0 0 0 2px var(--terra)}
+body.view:not(.only) .pill:has(input[type=checkbox]:checked){background:#fbe3d5;border-color:var(--terra);box-shadow:inset 0 0 0 1px var(--terra)}
+body.view:not(.only) .opt:not(:has(input:checked)),body.view:not(.only) .pill:not(:has(input:checked)),body.view:not(.only) .pic:not(:has(input:checked)){opacity:.55}
+body.view:not(.only) .ritem:has(input:checked){background:#fdf0e8}
+body.view .topbar .bno{white-space:nowrap}
+@media (max-width:520px){body.view .topbar .dots{display:none}body.view .topbar b{font-size:10px}}
+body.view .view-empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:14px}
+@media print{body.view .topbar{position:static}body.view .outer{padding:0}body.view .sheet{box-shadow:none}}
 .sent-note{background:#eef5f0;border:1px solid #cfe2d5;border-radius:9px;padding:9px 12px;font-size:12.5px;color:#35553f}
 </style>
 
 <div class="topbar"><div class="topbar-in"><b>INTERIOR DESIGN CLIENT BRIEF</b><span class="bno" id="bno"></span><div class="dots"><i style="background:var(--sage)"></i><i style="background:var(--mustard)"></i><i style="background:var(--terra)"></i></div></div></div>
 <div class="outer"><form class="sheet" id="brief" autocomplete="on" novalidate></form></div>
 
+<!-- ADDED (TeleCRM): Telangana / Andhra Pradesh cities + areas for State / City / Location -->
+<script src="/brief-assets/places.js"></script>
 <script>
 const ICONS={"archive": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\" /> <path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\" /> <path d=\"M10 12h4\" /> </svg>", "armchair": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3\" /> <path d=\"M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z\" /> <path d=\"M5 18v2\" /> <path d=\"M19 18v2\" /> </svg>", "ban": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" /> </svg>", "bath": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5\" /> <line x1=\"10\" x2=\"8\" y1=\"5\" y2=\"7\" /> <line x1=\"2\" x2=\"22\" y1=\"12\" y2=\"12\" /> <line x1=\"7\" x2=\"7\" y1=\"19\" y2=\"21\" /> <line x1=\"17\" x2=\"17\" y1=\"19\" y2=\"21\" /> </svg>", "bed-double": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8\" /> <path d=\"M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4\" /> <path d=\"M12 4v6\" /> <path d=\"M2 18h20\" /> </svg>", "bed-single": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M3 20v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8\" /> <path d=\"M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4\" /> <path d=\"M3 18h18\" /> </svg>", "box": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\" /> <path d=\"m3.3 7 8.7 5 8.7-5\" /> <path d=\"M12 22V12\" /> </svg>", "building": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"16\" height=\"20\" x=\"4\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M9 22v-4h6v4\" /> <path d=\"M8 6h.01\" /> <path d=\"M16 6h.01\" /> <path d=\"M12 6h.01\" /> <path d=\"M12 10h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 10h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 10h.01\" /> <path d=\"M8 14h.01\" /> </svg>", "building-2": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z\" /> <path d=\"M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2\" /> <path d=\"M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2\" /> <path d=\"M10 6h4\" /> <path d=\"M10 10h4\" /> <path d=\"M10 14h4\" /> <path d=\"M10 18h4\" /> </svg>", "calendar": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> </svg>", "calendar-check": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"m9 16 2 2 4-4\" /> </svg>", "calendar-days": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" /> </svg>", "calendar-range": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M16 2v4\" /> <path d=\"M3 10h18\" /> <path d=\"M8 2v4\" /> <path d=\"M17 14h-6\" /> <path d=\"M13 18H7\" /> <path d=\"M7 14h.01\" /> <path d=\"M17 18h.01\" /> </svg>", "calendar-x": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"m14 14-4 4\" /> <path d=\"m10 14 4 4\" /> </svg>", "check": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 6 9 17l-5-5\" /> </svg>", "chef-hat": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z\" /> <line x1=\"6\" x2=\"18\" y1=\"17\" y2=\"17\" /> </svg>", "clipboard-list": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\" /> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\" /> <path d=\"M12 11h4\" /> <path d=\"M12 16h4\" /> <path d=\"M8 11h.01\" /> <path d=\"M8 16h.01\" /> </svg>", "coins": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"8\" cy=\"8\" r=\"6\" /> <path d=\"M18.09 10.37A6 6 0 1 1 10.34 18\" /> <path d=\"M7 6h1v4\" /> <path d=\"m16.71 13.88.7.71-2.82 2.82\" /> </svg>", "compass": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"10\" /> <polygon points=\"16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76\" /> </svg>", "construction": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect x=\"2\" y=\"6\" width=\"20\" height=\"8\" rx=\"1\" /> <path d=\"M17 14v7\" /> <path d=\"M7 14v7\" /> <path d=\"M17 3v3\" /> <path d=\"M7 3v3\" /> <path d=\"M10 14 2.3 6.3\" /> <path d=\"m14 6 7.7 7.7\" /> <path d=\"m8 6 8 8\" /> </svg>", "cooking-pot": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M2 12h20\" /> <path d=\"M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\" /> <path d=\"m4 8 16-4\" /> <path d=\"m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8\" /> </svg>", "door-closed": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14\" /> <path d=\"M2 20h20\" /> <path d=\"M14 12v.01\" /> </svg>", "door-open": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M13 4h3a2 2 0 0 1 2 2v14\" /> <path d=\"M2 20h3\" /> <path d=\"M13 20h9\" /> <path d=\"M10 12v.01\" /> <path d=\"M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z\" /> </svg>", "drumstick": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M15.45 15.4c-2.13.65-4.3.32-5.7-1.1-2.29-2.27-1.76-6.5 1.17-9.42 2.93-2.93 7.15-3.46 9.43-1.18 1.41 1.41 1.74 3.57 1.1 5.71-1.4-.51-3.26-.02-4.64 1.36-1.38 1.38-1.87 3.23-1.36 4.63z\" /> <path d=\"m11.25 15.6-2.16 2.16a2.5 2.5 0 1 1-4.56 1.73 2.49 2.49 0 0 1-1.41-4.24 2.5 2.5 0 0 1 3.14-.32l2.16-2.16\" /> </svg>", "file": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /> </svg>", "flame": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\" /> </svg>", "flower-2": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1\" /> <circle cx=\"12\" cy=\"8\" r=\"2\" /> <path d=\"M12 10v12\" /> <path d=\"M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z\" /> <path d=\"M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z\" /> </svg>", "gem": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M6 3h12l4 6-10 13L2 9Z\" /> <path d=\"M11 3 8 9l4 13 4-13-3-6\" /> <path d=\"M2 9h20\" /> </svg>", "heart": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\" /> </svg>", "home": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" /> <polyline points=\"9 22 9 12 15 12 15 22\" /> </svg>", "key": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\" /> <path d=\"m21 2-9.6 9.6\" /> <path d=\"m15.5 7.5 3 3L22 7l-3-3\" /> </svg>", "lamp-ceiling": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M12 2v5\" /> <path d=\"M6 7h12l4 9H2l4-9Z\" /> <path d=\"M9.17 16a3 3 0 1 0 5.66 0\" /> </svg>", "lamp-desk": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m14 5-3 3 2 7 8-8-7-2Z\" /> <path d=\"m14 5-3 3-3-3 3-3 3 3Z\" /> <path d=\"M9.5 6.5 4 12l3 6\" /> <path d=\"M3 22v-2c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2H3Z\" /> </svg>", "landmark": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <line x1=\"3\" x2=\"21\" y1=\"22\" y2=\"22\" /> <line x1=\"6\" x2=\"6\" y1=\"18\" y2=\"11\" /> <line x1=\"10\" x2=\"10\" y1=\"18\" y2=\"11\" /> <line x1=\"14\" x2=\"14\" y1=\"18\" y2=\"11\" /> <line x1=\"18\" x2=\"18\" y1=\"18\" y2=\"11\" /> <polygon points=\"12 2 20 7 4 7\" /> </svg>", "layers": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z\" /> <path d=\"m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65\" /> <path d=\"m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65\" /> </svg>", "layout-grid": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" /> </svg>", "lightbulb": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" /> </svg>", "mail": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\" /> <path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\" /> </svg>", "map": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <polygon points=\"3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21\" /> <line x1=\"9\" x2=\"9\" y1=\"3\" y2=\"18\" /> <line x1=\"15\" x2=\"15\" y1=\"6\" y2=\"21\" /> </svg>", "map-pin": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" /> </svg>", "message-circle": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" /> </svg>", "paint-roller": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"16\" height=\"6\" x=\"2\" y=\"2\" rx=\"2\" /> <path d=\"M10 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2\" /> <rect width=\"4\" height=\"6\" x=\"8\" y=\"16\" rx=\"1\" /> </svg>", "palette": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\" /> </svg>", "pencil": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\" /> <path d=\"m15 5 4 4\" /> </svg>", "person-standing": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"5\" r=\"1\" /> <path d=\"m9 20 3-6 3 6\" /> <path d=\"m6 8 6 2 6-2\" /> <path d=\"M12 10v4\" /> </svg>", "pill": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z\" /> <path d=\"m8.5 8.5 7 7\" /> </svg>", "refrigerator": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6Z\" /> <path d=\"M5 10h14\" /> <path d=\"M15 7v6\" /> </svg>", "ruler": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\" /> <path d=\"m14.5 12.5 2-2\" /> <path d=\"m11.5 9.5 2-2\" /> <path d=\"m8.5 6.5 2-2\" /> <path d=\"m17.5 15.5 2-2\" /> </svg>", "sheet": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" /> </svg>", "smartphone": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" /> </svg>", "smile": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M8 14s1.5 2 4 2 4-2 4-2\" /> <line x1=\"9\" x2=\"9.01\" y1=\"9\" y2=\"9\" /> <line x1=\"15\" x2=\"15.01\" y1=\"9\" y2=\"9\" /> </svg>", "sofa": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3\" /> <path d=\"M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z\" /> <path d=\"M4 18v2\" /> <path d=\"M20 18v2\" /> <path d=\"M12 4v9\" /> </svg>", "store": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7\" /> </svg>", "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" /> </svg>", "text": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M17 6.1H3\" /> <path d=\"M21 12.1H3\" /> <path d=\"M15.1 18H3\" /> </svg>", "user": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /> <circle cx=\"12\" cy=\"7\" r=\"4\" /> </svg>", "users": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" /> </svg>", "users-round": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M18 21a8 8 0 0 0-16 0\" /> <circle cx=\"10\" cy=\"8\" r=\"5\" /> <path d=\"M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3\" /> </svg>", "utensils": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2\" /> <path d=\"M7 2v20\" /> <path d=\"M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7\" /> </svg>", "warehouse": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z\" /> <path d=\"M6 18h12\" /> <path d=\"M6 14h12\" /> <rect width=\"12\" height=\"12\" x=\"6\" y=\"10\" /> </svg>", "x": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" /> </svg>"};
 const C={T:"var(--terra)",S:"var(--sage)",B:"var(--blue)",M:"var(--mustard)",P:"var(--plum)",Br:"var(--brown)"};
@@ -286,11 +340,17 @@ function room(name,icon,k,items){
    }<input class="note" type="text" id="${id}_n" aria-label="${esc(it)} – size / material / notes" placeholder=" "></div>`}).join("")}</div>`;
 }
 
-const STEPS=[["About you","user"],["Site","map-pin"],["Style","palette"],["Rooms","sofa"],["Storage","archive"],["Budget","coins"],["Timeline","calendar"],["Notes","pencil"]];
+/* ORIGINAL: const STEPS=[["About you","user"],["Site","map-pin"],["Style","palette"],["Rooms","sofa"],["Storage","archive"],["Budget","coins"],["Timeline","calendar"],["Notes","pencil"]];
+   UPDATED: "Materials" step added before Notes */
+const STEPS=[["About you","user"],["Site","map-pin"],["Style","palette"],["Rooms","sofa"],["Storage","archive"],["Budget","coins"],["Timeline","calendar"],["Materials","layers"],["Notes","pencil"]];
 
 const html=[
+/* ORIGINAL (cover top, before the Deeraj Interiors logo was added):
 `<div class="cover-top"><div><div class="eyebrow">YOUR HOME · YOUR STORY</div><h1>Interior Design<em>Client Brief</em></h1></div>
  <div class="dots">${["P","B","S","M","T"].map(c=>`<i style="background:${C[c]}"></i>`).join("")}</div></div>
+   UPDATED: Deeraj Interiors logo at the top right (above the colour dots) */
+`<div class="cover-top"><div><div class="eyebrow">YOUR HOME · YOUR STORY</div><h1>Interior Design<em>Client Brief</em></h1></div>
+ <div class="brand"><img class="logo" src="/brief-assets/img/logo.png" alt="Deeraj Interiors" width="531" height="137"><div class="dots">${["P","B","S","M","T"].map(c=>`<i style="background:${C[c]}"></i>`).join("")}</div></div></div>
  <p class="lede">Your answers help us plan the right design, budget and timeline for your home.<br>It takes about 15 minutes. Tick what fits, write what matters.</p>
  <img class="hero" src="/brief-assets/img/hero.jpg" alt="Illustrated living room with a terracotta sofa, plants and a sunny window">`,
 fields("1.4fr .8fr .8fr",[["Designer / Studio","text","full"],["Date","date"],["Brief no."]]),
@@ -299,26 +359,43 @@ fields("1.4fr .8fr .8fr",[["Designer / Studio","text","full"],["Date","date"],["
   <div class="tip">${ic("pencil","T")}<div><b>Write a few words</b><small>Sizes, names, dates. Blank is fine if unsure.</small></div></div>
   <div class="tip">${ic("heart","P")}<div><b>Show us what you love</b><small>Add photos or Pinterest links in Section 3.</small></div></div>
  </div>
- <div class="journey-h">YOUR JOURNEY IN 8 STEPS</div>
+<!-- ORIGINAL: <div class="journey-h">YOUR JOURNEY IN 8 STEPS</div> -->
+ <div class="journey-h">YOUR JOURNEY IN 9 STEPS</div>
  <nav class="journey" aria-label="Sections">${STEPS.map(([s,i],k)=>`<a href="#step-${k+1}" id="j${k}">${ic(i,CYCLE[k%6])}<sup>${k+1}</sup>${s}</a>`).join("")}</nav>`,
 
 sec(1,"About You","user"),
 fields("1fr 1fr",[["Full name"],["Phone / WhatsApp","tel"]]),
 fields("1fr 1fr",[["Email","email"],["Best time to call"]]),
 fields("1fr",[["Current address"]]),
-cards("Who decides?",[["Only me","user"],["Me + spouse / partner","users"],["Family together","users-round"],["Parents / elders","person-standing"],["Other","pencil"]]),
+/* ORIGINAL: cards("Who decides?",[["Only me","user"],["Me + spouse / partner","users"],["Family together","users-round"],["Parents / elders","person-standing"],["Other","pencil"]]),
+   UPDATED: "Who decides?" removed from the form - it is still built but kept hidden, so the
+   numbering of every box after it stays the same (briefs already submitted still show correctly) */
+cards("Who decides?",[["Only me","user"],["Me + spouse / partner","users"],["Family together","users-round"],["Parents / elders","person-standing"],["Other","pencil"]]).replace('<div class="q">','<div class="q" hidden>').replace('<div class="cards"','<div class="cards" hidden'),
 fields("1fr",[["Name of other decision maker(s)"]]),
 
 sec(2,"Project Location & Site Details","map-pin"),
 fields("1fr",[["Project address / society name"]]),
+/* ADDED (TeleCRM): State (AP / TS) -> City (of that state) -> Location (areas of that city). Fixed ids - saved with the other answers. */
+`<div class="row loc3" style="grid-template-columns:1fr 1fr 1.2fr">
+ <label class="fld"><span>State</span><select class="ls" data-k="state" aria-label="State"><option value="">Select state</option><option>Telangana</option><option>Andhra Pradesh</option></select><input type="text" class="lv" id="brief_state" data-label="State" tabindex="-1" aria-hidden="true"></label>
+ <label class="fld"><span>City</span><select class="ls" data-k="city" aria-label="City"></select><input type="text" class="lo" placeholder="Type city name" aria-label="City name"><input type="text" class="lv" id="brief_city" data-label="City" tabindex="-1" aria-hidden="true"></label>
+ <label class="fld"><span>Location / area</span><select class="ls" data-k="loc" aria-label="Location"></select><input type="text" class="lo" placeholder="Type location / area" aria-label="Location / area"><input type="text" class="lv" id="brief_location" data-label="Location" tabindex="-1" aria-hidden="true"></label>
+</div>`,
 fields("2fr 1fr",[["City & area / landmark","text","full"],["Floor no.","number"]]),
 cards("Property type",[["Apartment","building-2"],["Independent house / villa","home"],["Row house","warehouse"],["Office","building"],["Shop / showroom","store"],["Other","pencil"]]),
 pills("Configuration",["2 BHK","3 BHK","4 BHK+","Duplex"]),
 fields("1.5fr 1.3fr 1fr",[["Carpet / built-up area (sq ft)","number","full"],["Ceiling height (ft)","number"],["No. of balconies","number"]]),
 cards("Site status",[["Under construction","construction"],["Ready, not occupied","key"],["Occupied (renovation)","sofa"],["Rented","door-open"]],{n:4}),
-fields("1fr 1fr",[["Possession / handover date","date"],["Date site is open for measurement","date"]]),
-cards("Project scope",[["Full home","home"],["Only some rooms","layout-grid"],["Kitchen only","cooking-pot"],["Wardrobes only","door-closed"],["Furniture only","armchair"],["Renovation + new","paint-roller"]]),
+/* ORIGINAL: fields("1fr 1fr",[["Possession / handover date","date"],["Date site is open for measurement","date"]]), */
+/* UPDATED: renamed labels (same boxes, so answers already saved still show) */
+fields("1fr 1fr",[["Quotation discussion date","date"],["Measurements date","date"]]),
+/* ORIGINAL: cards("Project scope",[["Full home","home"],["Only some rooms","layout-grid"],["Kitchen only","cooking-pot"],["Wardrobes only","door-closed"],["Furniture only","armchair"],["Renovation + new","paint-roller"]]), */
+/* UPDATED: renamed labels (same boxes, so answers already saved still show) */
+cards("Project scope",[["Full home","home"],["Only some rooms","layout-grid"],["Kitchen only","cooking-pot"],["Wardrobes only","door-closed"],["Furniture only","armchair"],["Renovation","paint-roller"]]),
 cards("Floor plan available?",[["Yes, will share","map","T"],["No, need site measurement","ruler","S"],["Builder plan only","clipboard-list","B"]]),
+/* ADDED (TeleCRM): "Attach floor plan" - PDF or photo, saved straight away (not part of the numbered boxes) */
+`<div class="q">Attach floor plan</div>
+ <div class="fp" id="fpBox"><label class="fp-drop" for="fpInput"><input type="file" id="fpInput" accept="application/pdf,.pdf,image/*" multiple>${ic("file","B")}<span><b>Tap to attach floor plan</b><small>PDF or photo · up to 5 files · 10 MB each</small></span></label><ul class="fp-list" id="fpList"></ul></div>`,
 
 sec(3,"Style & Look You Like","palette","Tick the pictures that feel like home"),
 (()=>{const g=nid("g");const S=[["Modern","modern"],["Contemporary","contemporary"],["Minimal","minimal"],["Traditional / Indian","traditional"],["Luxury / classic","luxury"],["Scandinavian","scandinavian"],["Industrial","industrial"],["Boho","boho"],["Japandi","japandi"]];
@@ -360,18 +437,55 @@ lined("Existing furniture / items you want to KEEP or reuse:",3),
 sec(6,"Budget","coins"),
 cards("Rough budget (Rs.)",[["Below 5 lakh",1],["5 - 10 lakh",2],["10 - 20 lakh",3],["20 - 35 lakh",4],["35 - 60 lakh",5],["60 lakh+",6]],{kind:"coins"}),
 fields("1.4fr 1fr 1.4fr",[["Exact budget, if fixed (Rs.)","number","full"],["Flexibility (+/- %)","number"],["Budget includes furniture & decor?"]]),
-cards("Quality level",[["Economy / basic",1],["Standard",2],["Premium",3],["Luxury",4]],{kind:"gems"}),
-cards("Where to spend more?",[["Kitchen","cooking-pot","T"],["Wardrobes","door-closed","S"],["Living room","sofa","B"],["Bedrooms","bed-double","P"],["Lighting","lightbulb","M"],["Furniture","armchair","Br"],["Decor","palette","T"],["Other","pencil","S"]],{n:8}),
-cards("Payment",[["Own funds","coins","M"],["Home loan / bank","landmark","B"],["Stage-wise payments","calendar-days","S"]]),
+/* ORIGINAL: cards("Quality level",[["Economy / basic",1],["Standard",2],["Premium",3],["Luxury",4]],{kind:"gems"}),
+   UPDATED: removed from the form - still built but hidden so the numbering of the boxes after it stays the same */
+cards("Quality level",[["Economy / basic",1],["Standard",2],["Premium",3],["Luxury",4]],{kind:"gems"}).replace('<div class="q">','<div class="q" hidden>').replace('<div class="cards"','<div class="cards" hidden'),
+/* ORIGINAL: cards("Where to spend more?",[["Kitchen","cooking-pot","T"],["Wardrobes","door-closed","S"],["Living room","sofa","B"],["Bedrooms","bed-double","P"],["Lighting","lightbulb","M"],["Furniture","armchair","Br"],["Decor","palette","T"],["Other","pencil","S"]],{n:8}),
+   UPDATED: removed from the form - still built but hidden so the numbering of the boxes after it stays the same */
+cards("Where to spend more?",[["Kitchen","cooking-pot","T"],["Wardrobes","door-closed","S"],["Living room","sofa","B"],["Bedrooms","bed-double","P"],["Lighting","lightbulb","M"],["Furniture","armchair","Br"],["Decor","palette","T"],["Other","pencil","S"]],{n:8}).replace('<div class="q">','<div class="q" hidden>').replace('<div class="cards"','<div class="cards" hidden'),
+/* ORIGINAL: cards("Payment",[["Own funds","coins","M"],["Home loan / bank","landmark","B"],["Stage-wise payments","calendar-days","S"]]),
+   UPDATED: removed from the form - still built but hidden so the numbering of the boxes after it stays the same */
+cards("Payment",[["Own funds","coins","M"],["Home loan / bank","landmark","B"],["Stage-wise payments","calendar-days","S"]]).replace('<div class="q">','<div class="q" hidden>').replace('<div class="cards"','<div class="cards" hidden'),
 
 sec(7,"Timeline","calendar"),
 fields("1fr 1.2fr 1.2fr",[["Preferred start date","date"],["Move-in / completion deadline","date"],["Fixed event? (wedding, festival...)","text","full"]]),
-cards("How strict?",[["Fixed, cannot move","calendar-x","T"],["Flexible by few weeks","calendar-range","M"],["Flexible","calendar-check","S"]]),
-pills("Will anyone stay at site during work?",["Yes","No","Site will be vacant"]),
-pills("Site access",["Keys with me","Keys with security","I will be present","Contact person:"]),
+/* ORIGINAL: cards("How strict?",[["Fixed, cannot move","calendar-x","T"],["Flexible by few weeks","calendar-range","M"],["Flexible","calendar-check","S"]]),
+   UPDATED: removed from the form - still built but hidden so the numbering of the boxes after it stays the same */
+cards("How strict?",[["Fixed, cannot move","calendar-x","T"],["Flexible by few weeks","calendar-range","M"],["Flexible","calendar-check","S"]]).replace('<div class="q">','<div class="q" hidden>').replace('<div class="cards"','<div class="cards" hidden'),
+/* ORIGINAL: pills("Will anyone stay at site during work?",["Yes","No","Site will be vacant"]),
+   UPDATED: removed from the form - still built but hidden so the numbering of the boxes after it stays the same */
+pills("Will anyone stay at site during work?",["Yes","No","Site will be vacant"]).replace('<div class="q">','<div class="q" hidden>').replace('<div class="pills"','<div class="pills" hidden'),
+/* ORIGINAL: pills("Site access",["Keys with me","Keys with security","I will be present","Contact person:"]),
+   UPDATED: removed from the form - still built but hidden so the numbering of the boxes after it stays the same */
+pills("Site access",["Keys with me","Keys with security","I will be present","Contact person:"]).replace('<div class="q">','<div class="q" hidden>').replace('<div class="pills"','<div class="pills" hidden'),
 cards("Update me via",[["WhatsApp","message-circle","S"],["Phone call","smartphone","B"],["Email","mail","P"],["Site visits","map-pin","T"],["Weekly meeting","users","M"]]),
 
-sec(8,"Final Notes","pencil"),
+/* ADDED (TeleCRM): new main heading "Materials" above Final Notes */
+sec(8,"Materials","layers"),
+/* ADDED (TeleCRM): Materials - 4 dropdowns. Fixed ids (mat_*) so they are saved with the other answers
+   and do not change the numbering of the other boxes. */
+(()=>{const sel=(label,key,opts,other)=>`<label class="fld msel" data-other="${other?"1":""}"><span>${esc(label)}</span><select class="ls" aria-label="${esc(label)}"><option value="">Select</option>${opts.map(o=>`<option>${esc(o)}</option>`).join("")}${other?'<option value="__o">Others (type)</option>':""}</select>${other?`<input type="text" class="lo" placeholder="${esc(other)}" aria-label="${esc(other)}">`:""}<input type="text" class="lv" id="mat_${key}" data-label="${esc(label)}" tabindex="-1" aria-hidden="true"></label>`;
+  return `<div class="row mat4" style="grid-template-columns:1.3fr 1fr 1fr 1.3fr">${
+    sel("Plywood","ply",["Sylan","Green Ply","Mikasa","Austin"],"Type plywood brand / type")+
+    sel("Plywood thickness","ply_mm",["16 mm","18 mm"])+
+    sel("Laminate thickness","lam_mm",["1 mm","2 mm"])+
+    sel("Laminate budget","lam_budget",["₹2,000 – ₹3,000","₹3,000 – ₹4,000","Above ₹4,000"])}</div>`})(),
+/* ADDED (TeleCRM): Materials - hardware: Tandem, Hinges, Drawer channels (fixed ids mat_*, "Others" lets the client type) */
+(()=>{const sel=(label,key,opts,other)=>`<label class="fld msel" data-other="${other?"1":""}"><span>${esc(label)}</span><select class="ls" aria-label="${esc(label)}"><option value="">Select</option>${opts.map(o=>`<option>${esc(o)}</option>`).join("")}${other?'<option value="__o">Others (type)</option>':""}</select>${other?`<input type="text" class="lo" placeholder="${esc(other)}" aria-label="${esc(other)}">`:""}<input type="text" class="lv" id="mat_${key}" data-label="${esc(label)}" tabindex="-1" aria-hidden="true"></label>`;
+  return `<div class="row mat3" style="grid-template-columns:1fr 1fr 1fr">${
+    sel("Tandem","tandem",["Hettich","Nimmi","Ebco"],"Type tandem brand")+
+    sel("Hinges","hinges",["Hettich","Blum","Ebco"],"Type hinges brand")+
+    sel("Drawer channels","channels",["Hettich","Hafele","Ebco"],"Type drawer channel brand")}</div>`})(),
+/* ADDED (TeleCRM): Materials - kitchen: Chimney & hob, Corner units, Bottle pull-out, Kitchen handles, Kitchen countertop */
+(()=>{const sel=(label,key,opts,other)=>`<label class="fld msel" data-other="${other?"1":""}"><span>${esc(label)}</span><select class="ls" aria-label="${esc(label)}"><option value="">Select</option>${opts.map(o=>`<option>${esc(o)}</option>`).join("")}${other?'<option value="__o">Others (type)</option>':""}</select>${other?`<input type="text" class="lo" placeholder="${esc(other)}" aria-label="${esc(other)}">`:""}<input type="text" class="lv" id="mat_${key}" data-label="${esc(label)}" tabindex="-1" aria-hidden="true"></label>`;
+  return `<div class="row mat5" style="grid-template-columns:1fr 1fr .8fr 1fr 1fr">${
+    sel("Chimney & hob","chimney_hob",["Faber","Elica","Glen","Kaff"],"Type chimney & hob brand")+
+    sel("Corner units","corner",["Hafele","Kaff","Nilkamal"],"Type corner unit brand")+
+    sel("Bottle pull-out","bottle",["Yes","No"])+
+    sel("Kitchen handles","handles",["Gola profile","G profile","L profile"],"Type handle type")+
+    sel("Kitchen countertop","countertop",["Marble","Quartz","Granite"])}</div>`})(),
+/* ORIGINAL: sec(8,"Final Notes","pencil"), */
+sec(9,"Final Notes","pencil"),
 lined("Biggest problems in your current home that this design should fix:",5),
 lined("Anything else we should know? (budget worries, family preferences, must-haves, deal-breakers)",5),
 `<label class="confirm"><input type="checkbox" id="confirm" name="confirm" value="Confirmed"><span class="ic">${svg("check")}</span>I confirm the information above is correct to the best of my knowledge. Details may change after the site visit.</label>`,
@@ -383,6 +497,93 @@ fields("1.3fr .7fr 1.3fr",[["Client signature","text","sign full"],["Date","date
 ];
 const form=document.getElementById("brief");
 form.innerHTML=html.join("");
+/* ADDED (TeleCRM): State -> City -> Location. The chosen values are kept in 3 hidden boxes
+   (brief_state / brief_city / brief_location) so they are saved, reloaded and sent like every other answer. */
+const PL=window.DI_PLACES||{"Telangana":[],"Andhra Pradesh":[],areas:{}};
+const lsame=(a,b)=>String(a||"").trim().toLowerCase()===String(b||"").trim().toLowerCase();
+const LV=k=>document.getElementById("brief_"+k);
+const L3=form.querySelector(".loc3");
+const sState=L3.querySelector('[data-k="state"]'),sCity=L3.querySelector('[data-k="city"]'),sLoc=L3.querySelector('[data-k="loc"]');
+const oCity=sCity.parentElement.querySelector(".lo"),oLoc=sLoc.parentElement.querySelector(".lo");
+const lopts=a=>a.map(x=>`<option>${esc(x)}</option>`).join("");
+const lstateOf=c=>["Telangana","Andhra Pradesh"].find(st=>(PL[st]||[]).some(x=>lsame(x,c)))||"";
+const lareas=c=>{const k=Object.keys(PL.areas||{}).find(x=>lsame(x,c));return k?PL.areas[k]:[]};
+function lset(k,v){const i=LV(k);if(i.value!==v){i.value=v;i.dispatchEvent(new Event("input",{bubbles:true}))}}
+/* ADDED (TeleCRM): Materials dropdowns - the chosen value is kept in the hidden box (mat_*) */
+function matRender(){
+  document.querySelectorAll("#brief .msel").forEach(l=>{const sel=l.querySelector("select"),lo=l.querySelector(".lo"),v=l.querySelector(".lv").value;
+    const opts=[...sel.options].map(o=>o.value).filter(x=>x&&x!=="__o");const inList=opts.find(o=>lsame(o,v));
+    const other=Boolean(lo)&&(l.dataset.oo==="1"||Boolean(v&&!inList));
+    sel.value=other?"__o":(inList||"");if(lo){lo.classList.toggle("on",other);if(document.activeElement!==lo)lo.value=other?v:""}});
+}
+function locRender(){
+  const st=LV("state").value,c=LV("city").value,l=LV("location").value;
+  sState.value=["Telangana","Andhra Pradesh"].includes(st)?st:"";
+  const all=sState.value?PL[sState.value]:[...PL["Telangana"],...PL["Andhra Pradesh"]];
+  sCity.innerHTML='<option value="">Select city</option>'+(sState.value?lopts(PL[sState.value]):`<optgroup label="Telangana">${lopts(PL["Telangana"])}</optgroup><optgroup label="Andhra Pradesh">${lopts(PL["Andhra Pradesh"])}</optgroup>`)+'<option value="__o">Other (type city)</option>';
+  const cIn=all.find(x=>lsame(x,c));const cOther=L3.dataset.co==="1"||Boolean(c&&!cIn);
+  sCity.value=cOther?"__o":(cIn||"");oCity.classList.toggle("on",cOther);if(document.activeElement!==oCity)oCity.value=cOther?c:"";
+  const ar=cOther?[]:lareas(cIn||"");
+  if(ar.length){sLoc.hidden=false;sLoc.innerHTML='<option value="">Select location</option>'+lopts(ar)+'<option value="__o">Other (type location)</option>';
+    const lIn=ar.find(x=>lsame(x,l));const lOther=L3.dataset.lo==="1"||Boolean(l&&!lIn);sLoc.value=lOther?"__o":(lIn||"");oLoc.classList.toggle("on",lOther);if(document.activeElement!==oLoc)oLoc.value=lOther?l:""}
+  else{sLoc.hidden=true;sLoc.innerHTML="";oLoc.classList.add("on");if(document.activeElement!==oLoc)oLoc.value=l}
+  matRender(); /* ADDED (TeleCRM): Materials */
+}
+sState.addEventListener("change",()=>{const st=sState.value;lset("state",st);const c=LV("city").value;
+  if(st&&c&&L3.dataset.co!=="1"&&lstateOf(c)&&!(PL[st]||[]).some(x=>lsame(x,c))){lset("city","");lset("location","");L3.dataset.lo=""}locRender()});
+sCity.addEventListener("change",()=>{const v=sCity.value;
+  if(v==="__o"){L3.dataset.co="1";if(lstateOf(LV("city").value)){lset("city","");lset("location","")}L3.dataset.lo="";locRender();oCity.focus();return}
+  L3.dataset.co="";lset("city",v);if(v&&!LV("state").value)lset("state",lstateOf(v));
+  const ar=lareas(v);if(ar.length&&!ar.some(x=>lsame(x,LV("location").value)))lset("location","");L3.dataset.lo="";locRender()});
+oCity.addEventListener("input",()=>lset("city",oCity.value));
+sLoc.addEventListener("change",()=>{if(sLoc.value==="__o"){L3.dataset.lo="1";lset("location","");locRender();oLoc.focus();return}L3.dataset.lo="";lset("location",sLoc.value);locRender()});
+oLoc.addEventListener("input",()=>lset("location",oLoc.value));
+/* ADDED (TeleCRM): Materials dropdown changes */
+form.querySelectorAll(".msel").forEach(l=>{const sel=l.querySelector("select"),lo=l.querySelector(".lo"),hv=l.querySelector(".lv");
+  const setv=v=>{if(hv.value!==v){hv.value=v;hv.dispatchEvent(new Event("input",{bubbles:true}))}};
+  sel.addEventListener("change",()=>{if(sel.value==="__o"){l.dataset.oo="1";setv("");matRender();if(lo)lo.focus();return}l.dataset.oo="";setv(sel.value);matRender()});
+  if(lo)lo.addEventListener("input",()=>setv(lo.value));});
+locRender();
+/* ADDED (TeleCRM): Attach floor plan - each file is sent to Deeraj Interiors as soon as it is chosen */
+let fpFiles=[];
+const fpInput=document.getElementById("fpInput"),fpList=document.getElementById("fpList");
+const fpSize=n=>n>=1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
+function fpRender(uploading){
+  const ro=document.body.classList.contains("view");
+  fpList.innerHTML=fpFiles.map(f=>`<li>${ic(/pdf/i.test(f.mime)?"file":"map","B")}<a href="${API}/files/${f.id}" target="_blank" rel="noopener">${esc(f.name)}</a><span class="sz">${fpSize(f.size)}</span>${ro?"":`<button type="button" data-fid="${f.id}">Remove</button>`}</li>`).join("")
+    +(uploading||[]).map(n=>`<li class="up">Uploading ${esc(n)}…</li>`).join("")
+    +(ro&&!fpFiles.length?'<li class="fp-none">No floor plan attached.</li>':"");
+}
+async function fpShrink(file){ /* a very big photo is made smaller (plans stay readable at 2600px) */
+  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)||file.size<=10*1048576)return file;
+  const url=await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result);rd.readAsDataURL(file)});
+  return new Promise(res=>{const im=new Image();im.onload=()=>{const M=2600;const k=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);c.toBlob(b=>res(b?new File([b],file.name.replace(/\.\w+$/,"")+".jpg",{type:"image/jpeg"}):file),"image/jpeg",0.85)};im.onerror=()=>res(file);im.src=url})}
+fpInput.addEventListener("change",async()=>{
+  const picked=[...fpInput.files];fpInput.value="";if(!picked.length)return;
+  if(fpFiles.length+picked.length>5){popup("err","Too many files","You can attach up to 5 floor plan files.");return}
+  const bad=picked.find(f=>!(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)||/^image\//.test(f.type)));
+  if(bad){popup("err","Not a floor plan file","“"+bad.name+"” is not a PDF or a photo. Please attach the floor plan as a PDF or a photo (JPG / PNG).");return}
+  const left=picked.map(f=>f.name);fpRender(left);let ok=0;
+  for(const raw of picked){
+    const file=await fpShrink(raw);
+    if(file.size>10*1048576){popup("err","File too big","“"+raw.name+"” is bigger than 10 MB. Please choose a smaller file.");left.shift();fpRender(left);continue}
+    try{const type=file.type||(/\.pdf$/i.test(file.name)?"application/pdf":"application/octet-stream");
+      const r=await fetch(API+"/files",{method:"POST",headers:{"Content-Type":type,"X-File-Name":encodeURIComponent(file.name)},body:file});
+      let d={};try{d=await r.json()}catch(e){}
+      if(!r.ok)popup("err","Floor plan not attached",r.status===413?"This file is too big. Please choose a file under 10 MB.":(d.error||"Please try again."));
+      else{fpFiles.push(d.file);ok++}
+    }catch(e){popup("err","Floor plan not attached","Could not reach Deeraj Interiors. Please check your internet and try again.")}
+    left.shift();fpRender(left);
+  }
+  if(ok)popup("ok","Floor plan attached",ok===1?"Your floor plan has been sent to Deeraj Interiors.":ok+" floor plan files have been sent to Deeraj Interiors.");
+  progress&&progress();
+});
+fpList.addEventListener("click",async e=>{const b=e.target.closest("button[data-fid]");if(!b)return;
+  const f=fpFiles.find(x=>String(x.id)===b.dataset.fid);if(!f||!confirm("Remove “"+f.name+"”?"))return;
+  b.disabled=true;
+  try{const r=await fetch(API+"/files/"+f.id,{method:"DELETE"});if(!r.ok&&r.status!==404)throw new Error();fpFiles=fpFiles.filter(x=>x!==f);fpRender();popup("ok","Floor plan removed","“"+f.name+"” has been removed.")}
+  catch(err){b.disabled=false;popup("err","Not removed","Could not remove the file. Please try again.")}});
 
 /* exclusive Yes/Maybe/No */
 form.addEventListener("change",e=>{const t=e.target;if(t.matches("[data-excl]")&&t.checked)form.querySelectorAll(`input[name="${t.name}"]`).forEach(o=>{if(o!==t)o.checked=false})});
@@ -407,6 +608,12 @@ const TOKEN=(location.pathname.match(/\/brief\/([a-f0-9]+)/i)||[])[1]||new URLSe
 const API="/api/public/briefs/"+TOKEN;
 /* ORIGINAL: const KEY="di-client-brief-native-v1"; */
 const KEY="di-client-brief-native-v1-"+TOKEN;
+/* ADDED (TeleCRM): view=1 -> read-only answers view for the Deeraj team; mask=1 -> phone shown as xxxxxxx123 */
+const QS=new URLSearchParams(location.search);const VIEW=QS.has("view");const MASK=QS.get("mask")==="1";
+/* ADDED: only=1 -> the earlier "only what the client filled" view; without it the FULL form is shown with the client's choices marked */
+const ONLY=QS.get("only")==="1";
+if(VIEW)document.body.classList.add("view");
+if(VIEW&&ONLY)document.body.classList.add("only");
 function save(){const d={};form.querySelectorAll("input,textarea").forEach(el=>{if(!el.id||el.type==="file"||el.id==="summary")return;if(el.type==="checkbox"){if(el.checked)d[el.id]=1}else if(el.value)d[el.id]=el.value});
   try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}progress()}
 function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}if(!d)return;
@@ -415,6 +622,7 @@ function progress(){for(let k=1;k<=STEPS.length;k++){const s=document.getElement
   while(el&&!el.classList.contains("sec")){if([...el.querySelectorAll("input,textarea")].some(i=>i.type==="checkbox"?i.checked:(i.type!=="file"&&i.id!=="summary"&&i.value))){on=true;break}el=el.nextElementSibling}
   document.getElementById("j"+(k-1)).classList.toggle("done",on)}}
 load();progress();
+locRender(); /* ADDED (TeleCRM): show the saved State / City / Location */
 form.addEventListener("input",save);form.addEventListener("change",save);
 
 /* summary */
@@ -423,7 +631,8 @@ function summary(){
   [...form.children].forEach(el=>{
     if(el.classList.contains("sec")){cur=el.querySelector(".num").textContent+". "+el.querySelector("h2").textContent.toUpperCase();return}
     const lines=[];const q=s=>[...(el.matches(s)?[el]:[]),...el.querySelectorAll(s)];
-    q(".fld input").forEach(i=>{if(i.value)lines.push(`${i.dataset.label}: ${i.value}`)});
+    /* ORIGINAL: q(".fld input").forEach(i=>{if(i.value)lines.push(`${i.dataset.label}: ${i.value}`)}); */
+    q(".fld input[data-label]").forEach(i=>{if(i.value)lines.push(`${i.dataset.label}: ${i.value}`)});
     q("[data-q]").forEach(g=>{const v=[...g.querySelectorAll("input[type=checkbox]:checked")].map(c=>{const t=c.parentElement.querySelector(".inl");return t&&t.value?`${c.value} (${t.value})`:c.value});if(v.length)lines.push(`${g.dataset.q}: ${v.join(", ")}`)});
     q("textarea[data-label]").forEach(t=>{if(t.value)lines.push(`${t.dataset.label} ${t.value.replace(/\n+/g," / ")}`)});
     q(".room").forEach(r=>{const rows=[];r.querySelectorAll(".ritem").forEach(it=>{const c=it.querySelector("input:checked");const n=it.querySelector(".note").value;if(c||n)rows.push(`   - ${it.dataset.item}: ${c?c.value:"—"}${n?" ("+n+")":""}`)});if(rows.length)lines.push(r.dataset.room+":",...rows)});
@@ -441,7 +650,8 @@ document.getElementById("bCopy").addEventListener("click",()=>{const s=showSum()
 let armed=false;
 document.getElementById("bClear").addEventListener("click",e=>{const b=e.currentTarget;
   if(!armed){armed=true;b.textContent="Tap again to clear everything";setTimeout(()=>{armed=false;b.textContent="Clear form"},3500);return}
-  armed=false;b.textContent="Clear form";form.reset();form.querySelectorAll("[data-photo] img").forEach(i=>i.remove());form.querySelectorAll("[data-photo] input[type=file]").forEach(f=>{f.value=""});
+  /* ORIGINAL: armed=false;b.textContent="Clear form";form.reset();form.querySelectorAll("[data-photo] img").forEach(i=>i.remove());form.querySelectorAll("[data-photo] input[type=file]").forEach(f=>{f.value=""}); */
+  armed=false;b.textContent="Clear form";form.reset();L3.dataset.co="";L3.dataset.lo="";form.querySelectorAll(".msel").forEach(l=>l.dataset.oo="");locRender();form.querySelectorAll("[data-photo] img").forEach(i=>i.remove());form.querySelectorAll("[data-photo] input[type=file]").forEach(f=>{f.value=""});
   try{localStorage.removeItem(KEY)}catch(e){}document.getElementById("summary").hidden=true;progress();say("Form cleared.")});
 
 /* ===== ADDED (TeleCRM): send the brief to Deeraj Interiors ===== */
@@ -465,17 +675,21 @@ function structured(){
   [...form.children].forEach(el=>{
     if(el.classList.contains("sec")){if(cur.items.length)out.push(cur);cur={section:el.querySelector(".num").textContent+". "+el.querySelector("h2").textContent,items:[]};return}
     const q=s=>[...(el.matches(s)?[el]:[]),...el.querySelectorAll(s)];
-    q(".fld input").forEach(i=>push(i.dataset.label,i.value.trim()));
+    /* ORIGINAL: q(".fld input").forEach(i=>push(i.dataset.label,i.value.trim())); */
+    q(".fld input[data-label]").forEach(i=>push(i.dataset.label,i.value.trim()));
     q("[data-q]").forEach(g=>{const v=[...g.querySelectorAll("input[type=checkbox]:checked")].map(c=>{const t=c.parentElement.querySelector(".inl");return t&&t.value?`${c.value} (${t.value})`:c.value});if(v.length)push(g.dataset.q,v.join(", "))});
     q("textarea[data-label]").forEach(t=>push(t.dataset.label.replace(/:$/,""),t.value.trim()));
     q(".room").forEach(r=>r.querySelectorAll(".ritem").forEach(it=>{const c=it.querySelector("input:checked");const n=it.querySelector(".note").value.trim();if(c||n)push(`${r.dataset.room} – ${it.dataset.item}`,`${c?c.value:"—"}${n?" ("+n+")":""}`)}));
     q("#confirm").forEach(c=>{if(c.checked)push("Client confirmed the information","Yes")});
     const ph=q("[data-photo] img").map(i=>i.parentElement.dataset.photo);if(ph.length)push("Photos added",ph.join(", "));
+    q("#fpBox").forEach(()=>{if(fpFiles.length)push("Floor plan attached",fpFiles.map(f=>f.name).join(", "))}); /* ADDED (TeleCRM) */
   });
   if(cur.items.length)out.push(cur);return out;
 }
 function rawState(){const d={};form.querySelectorAll("input,textarea").forEach(el=>{if(!el.id||el.type==="file"||el.id==="summary")return;if(el.type==="checkbox"){if(el.checked)d[el.id]=1}else if(el.value)d[el.id]=el.value});return d}
-function applyRaw(d){form.reset();Object.entries(d||{}).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==="checkbox")el.checked=true;else el.value=v})}
+/* ORIGINAL: function applyRaw(d){form.reset();Object.entries(d||{}).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==="checkbox")el.checked=true;else el.value=v})}
+   UPDATED: also shows the State / City / Location that were saved */
+function applyRaw(d){form.reset();Object.entries(d||{}).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==="checkbox")el.checked=true;else el.value=v});L3.dataset.co="";L3.dataset.lo="";form.querySelectorAll(".msel").forEach(l=>l.dataset.oo="");locRender()}
 function showPhotos(slots){serverPhotos=slots||[];serverPhotos.forEach(slot=>{const a=form.querySelector(`[data-photo="${slot}"]`);if(!a||a.querySelector("img"))return;
   const im=document.createElement("img");im.alt=slot+" inspiration photo";im.src=API+"/photos/"+encodeURIComponent(slot)+"?v="+Date.now();a.insertBefore(im,a.querySelector("input[type=file]"))})}
 function badLink(msg){document.querySelector(".outer").innerHTML=`<div class="badlink"><h2>Link not valid</h2><p></p></div>`;document.querySelector(".badlink p").textContent=msg}
@@ -485,8 +699,11 @@ function markSent(again){sb.textContent="Update my brief";
   n.textContent=again?"Your brief was sent to Deeraj Interiors. You can change anything and tap “Update my brief”.":"Your brief was sent to Deeraj Interiors. You can change anything and tap “Update my brief”."}
 async function init(){
   if(!TOKEN){badLink("This link is not complete. Please open the full link sent by Deeraj Interiors on WhatsApp.");return}
-  let d;try{const r=await fetch(API);d=await r.json();if(!r.ok){badLink(d.error||"This link is not valid.");return}}catch(e){say("Could not reach Deeraj Interiors - check your internet.");return}
+  /* ORIGINAL: let d;try{const r=await fetch(API);d=await r.json();if(!r.ok){badLink(d.error||"This link is not valid.");return}}catch(e){say("Could not reach Deeraj Interiors - check your internet.");return} */
+  let d;try{const r=await fetch(API+(VIEW?"?view=1":""));d=await r.json();if(!r.ok){badLink(d.error||"This link is not valid.");return}}catch(e){say("Could not reach Deeraj Interiors - check your internet.");return}
   document.getElementById("bno").textContent=d.brief_no;
+  fpFiles=d.files||[];fpRender(); /* ADDED (TeleCRM): floor plan files already attached */
+  if(VIEW){viewMode(d);return}
   let hasDraft=false;try{hasDraft=!!localStorage.getItem(KEY)}catch(e){}
   if(!hasDraft&&d.raw)applyRaw(d.raw);
   setIfEmpty("Designer / Studio","Deeraj Interiors");setIfEmpty("Brief no.",d.brief_no);
@@ -498,11 +715,13 @@ async function init(){
 sb.addEventListener("click",async()=>{
   if(!val("Full name")){popup("err","Your name is missing","Please write your full name in Section 1 (About You).",()=>byLabel("Full name").focus());return}
   if(val("Phone / WhatsApp").replace(/\D/g,"").length<10){popup("err","Phone number is missing","Please write your 10-digit phone / WhatsApp number in Section 1 (About You).",()=>byLabel("Phone / WhatsApp").focus());return}
-  if(!document.getElementById("confirm").checked){popup("err","Please confirm","Please tick “I confirm the information above is correct” in Section 8 (Final Notes) before sending.",()=>document.getElementById("confirm").closest("label").scrollIntoView({block:"center"}));return}
+  /* ORIGINAL: if(!document.getElementById("confirm").checked){popup("err","Please confirm","Please tick “I confirm the information above is correct” in Section 8 (Final Notes) before sending.",()=>document.getElementById("confirm").closest("label").scrollIntoView({block:"center"}));return} */
+  if(!document.getElementById("confirm").checked){popup("err","Please confirm","Please tick “I confirm the information above is correct” in Section 9 (Final Notes) before sending.",()=>document.getElementById("confirm").closest("label").scrollIntoView({block:"center"}));return}
   const photos={};["Living","Kitchen","Bedroom"].forEach(slot=>{const a=form.querySelector(`[data-photo="${slot}"]`);const im=a&&a.querySelector("img");
     if(im&&im.dataset.fresh&&im.src.startsWith("data:"))photos[slot]=im.src;else if(!im&&serverPhotos.includes(slot))photos[slot]=null});
   const body={raw:rawState(),answers:structured(),summary:summary(),photos,
-    key:{name:val("Full name"),phone:val("Phone / WhatsApp"),email:val("Email"),city_area:val("City & area / landmark"),property_type:picked("Property type"),configuration:picked("Configuration"),
+  /* ORIGINAL: key:{name:val("Full name"),phone:val("Phone / WhatsApp"),email:val("Email"),city_area:val("City & area / landmark"),property_type:picked("Property type"),configuration:picked("Configuration"), */
+    key:{name:val("Full name"),phone:val("Phone / WhatsApp"),email:val("Email"),city_area:[[val("Location"),val("City")].filter(Boolean).join(", "),val("City & area / landmark")].filter(Boolean).join(" · "),state:val("State"),city:val("City"),location:val("Location"),property_type:picked("Property type"),configuration:picked("Configuration"),
          budget:[picked("Rough budget (Rs.)"),val("Exact budget, if fixed (Rs.)")?"Rs. "+val("Exact budget, if fixed (Rs.)"):""].filter(Boolean).join(" / ")}};
   const label=sb.textContent;sb.disabled=true;sb.textContent="Sending...";
   try{const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -516,6 +735,56 @@ sb.addEventListener("click",async()=>{
   }catch(e){popup("err","Brief not sent","Could not reach Deeraj Interiors. Please check your internet and try again.");sb.textContent=label}
   finally{sb.disabled=false}
 });
+/* ADDED (TeleCRM): read-only view - the client's answers in the same brief design,
+   with every empty box / not-ticked option / empty room row / empty section hidden */
+function viewMode(d){
+  try{localStorage.removeItem(KEY)}catch(e){}
+  document.querySelector(".topbar b").innerHTML='CLIENT ANSWERS <span class="view-badge">'+(d.submitted?"SUBMITTED":"NOT SUBMITTED YET")+'</span>';
+  applyRaw(d.raw||{});
+  showPhotos(d.photos);
+  if(MASK){const p=byLabel("Phone / WhatsApp");if(p&&p.value){const g=p.value.replace(/\D/g,"");p.value=g.length>3?"x".repeat(Math.max(0,g.length-3))+g.slice(-3):p.value}}
+  const H=el=>el.classList.add("vh");
+  // ADDED: FULL form view (default) - every question and option stays, the client's
+  // answers are filled in / ticked; only the buttons are hidden (read-only)
+  if(!ONLY){
+    form.querySelectorAll(".actions,#summary,#sentNote").forEach(H);
+    form.querySelectorAll(".pill .inl").forEach(t=>{if(!t.value)t.placeholder=""});
+    if(!d.submitted&&!d.raw){const m=document.createElement("div");m.className="view-empty";m.textContent="The client has not submitted this brief yet.";form.prepend(m)}
+    /* ORIGINAL: form.inert=true; - UPDATED: everything read-only except the floor plan list (so its files can be opened) */[...form.children].forEach(c=>{if(!c.contains(fpList))c.inert=true});
+    const tell0=()=>{try{parent.postMessage({type:"di-brief-height",h:document.documentElement.scrollHeight},"*")}catch(e){}};
+    tell0();window.addEventListener("load",tell0);setTimeout(tell0,600);setTimeout(tell0,1500);
+    form.querySelectorAll("img").forEach(i=>i.addEventListener("load",tell0));
+    if(QS.has("print"))window.addEventListener("load",()=>setTimeout(()=>window.print(),400));
+    return;
+  }
+  // "only filled" view (only=1) - below is the earlier view, kept as it was
+  // parts of the blank form that are not answers
+  form.querySelectorAll(".tips,.journey-h,.journey,.lede,.tipbox,.thanks,.actions,#summary,.foot,#sentNote").forEach(H);
+  // answers: hide what is empty / not ticked
+  /* ORIGINAL: form.querySelectorAll(".fld").forEach(f=>{const i=f.querySelector("input");if(!i||!i.value.trim())H(f)}); */
+  form.querySelectorAll(".fld").forEach(f=>{const i=f.querySelector("input[data-label]");if(!i||!i.value.trim())H(f)});
+  form.querySelectorAll(".opt,.pill,.pic").forEach(l=>{const c=l.querySelector("input[type=checkbox]");if(!c||!c.checked)H(l);else{const t=l.querySelector(".inl");if(t&&!t.value)t.classList.add("vh")}});
+  form.querySelectorAll(".lined").forEach(l=>{const t=l.querySelector("textarea");if(!t||!t.value.trim())H(l);else{t.rows=Math.max(1,t.value.split("\n").length);t.style.setProperty("--r",t.rows)}});
+  form.querySelectorAll(".ritem").forEach(r=>{if(!r.querySelector("input:checked")&&!r.querySelector(".note").value.trim())H(r)});
+  form.querySelectorAll(".polaroid").forEach(p=>{if(!p.querySelector("img"))H(p)});
+  const cf=document.getElementById("confirm");if(cf&&!cf.checked)H(cf.closest(".confirm"));
+  // containers whose answers are all hidden (rows, groups, rooms, photo area) - deepest first
+  const U=".fld,.opt,.pill,.pic,.lined,.ritem,.polaroid,.confirm";
+  [...form.querySelectorAll("*")].reverse().forEach(el=>{if(el.matches(U)||el.classList.contains("vh"))return;const us=[...el.querySelectorAll(U)];if(us.length&&us.every(u=>u.closest(".vh")))H(el)});
+  // a question title with no answer after it
+  form.querySelectorAll(".q").forEach(q=>{let n=q.nextElementSibling;if(!n||n.classList.contains("vh")||n.classList.contains("sec")||n.classList.contains("q"))H(q)});
+  // a section with nothing answered
+  const kids=[...form.children];kids.forEach((el,i)=>{if(!el.classList.contains("sec"))return;let any=false;
+    for(let j=i+1;j<kids.length&&!kids[j].classList.contains("sec");j++){const k=kids[j];if(!k.classList.contains("vh")&&!k.classList.contains("q")&&k.id!=="summary"){any=true;break}}
+    if(!any)H(el)});
+  if(!d.submitted&&!d.raw){const m=document.createElement("div");m.className="view-empty";m.textContent="The client has not submitted this brief yet.";form.appendChild(m)}
+  /* ORIGINAL: form.inert=true; - UPDATED: everything read-only except the floor plan list (so its files can be opened) */[...form.children].forEach(c=>{if(!c.contains(fpList))c.inert=true});
+  // tell TeleCRM how tall the page is (so it shows without an inner scrollbar)
+  const tell=()=>{try{parent.postMessage({type:"di-brief-height",h:document.documentElement.scrollHeight},"*")}catch(e){}};
+  tell();window.addEventListener("load",tell);setTimeout(tell,600);setTimeout(tell,1500);
+  form.querySelectorAll("img").forEach(i=>i.addEventListener("load",tell));
+  if(QS.has("print"))window.addEventListener("load",()=>setTimeout(()=>window.print(),400));
+}
 init();
 </script>
 

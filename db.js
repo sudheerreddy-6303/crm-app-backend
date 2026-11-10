@@ -542,6 +542,22 @@ async function initDb() {
       )
     `);
 
+    // ADDED: Client Brief - floor plan files the client attaches in Section 2
+    // ("Attach floor plan": PDF or photo, up to 5 files, 10 MB each). New table.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS client_brief_files (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        brief_id INT NOT NULL,
+        kind VARCHAR(30) NOT NULL DEFAULT 'floor_plan',
+        file_name VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        size_bytes INT NOT NULL,
+        data MEDIUMBLOB NOT NULL,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (brief_id) REFERENCES client_briefs(id) ON DELETE CASCADE
+      )
+    `);
+
     // ADDED: State / City / Location in every form (Telangana / Andhra Pradesh).
     // Only the columns a table does not have yet are added; existing data untouched.
     const addressCols = [
@@ -554,6 +570,10 @@ async function initDb() {
       ["projects", "city", "VARCHAR(100) DEFAULT ''"],
       ["business_partners", "state", "VARCHAR(50) DEFAULT ''"],
       ["business_partners", "city", "VARCHAR(100) DEFAULT ''"],
+      // ADDED: Client Brief - State / City / Location the client picks in Section 2
+      ["client_briefs", "state", "VARCHAR(50) DEFAULT ''"],
+      ["client_briefs", "city", "VARCHAR(100) DEFAULT ''"],
+      ["client_briefs", "location", "VARCHAR(200) DEFAULT ''"],
     ];
     for (const [table, col, def] of addressCols) {
       const [exists] = await conn.query(
