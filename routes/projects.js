@@ -75,6 +75,54 @@ router.get("/crm-count", async (req, res) => {
   }
 });
 
+// ADDED: State / City / Location filter options for Project details - the values
+// actually saved on projects (so typed-in areas appear too). Read-only.
+router.get("/filter-options", async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT DISTINCT TRIM(state) AS state, TRIM(city) AS city, TRIM(location) AS location FROM projects`
+    );
+    const clean = (v) => String(v || "").replace(/\s+/g, " ").trim();
+    const seen = new Set(); const places = [];
+    rows.forEach((r) => {
+      const p = { state: clean(r.state), city: clean(r.city), location: clean(r.location) };
+      if (!p.state && !p.city && !p.location) return;
+      const k = `${p.state.toLowerCase()}|${p.city.toLowerCase()}|${p.location.toLowerCase()}`;
+      if (!seen.has(k)) { seen.add(k); places.push(p); }
+    });
+    res.json({ places });
+  } catch (err) {
+    console.error("Project filter options error:", err);
+    res.status(500).json({ error: "Failed to load filter options" });
+  }
+});
+
+// ADDED: Telangana / Andhra Pradesh cities + areas (same list as the forms; the file is
+// backend/public/client-brief/places.js). Used so old projects that only have a
+// location / city saved still match the State / City filters.
+let PLACES = { "Telangana": [], "Andhra Pradesh": [], areas: {} };
+try {
+  const txt = require("fs").readFileSync(require("path").join(__dirname, "..", "public", "client-brief", "places.js"), "utf8");
+  PLACES = JSON.parse(txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
+} catch (e) { console.error("places.js not loaded - State / City filters use saved values only:", e.message); }
+const lc = (v) => String(v || "").trim().toLowerCase();
+const citiesOfStates = (states) => {
+  const out = [];
+  Object.keys(PLACES).forEach((st) => { if (st !== "areas" && states.includes(lc(st))) out.push(...PLACES[st].map(lc)); });
+  return out;
+};
+const areasOfCities = (cities) => {
+  const out = [];
+  Object.entries(PLACES.areas || {}).forEach(([c, list]) => { if (cities.includes(lc(c))) out.push(...list.map(lc)); });
+  return out;
+};
+
+// ADDED: read a multi-select filter (?states=A|B or ?states=A&states=B) as a lower-case list
+function multi(v) {
+  const arr = Array.isArray(v) ? v : (v === undefined || v === "" ? [] : [v]);
+  return [...new Set(arr.flatMap((x) => String(x).split("|")).map((x) => x.replace(/\s+/g, " ").trim().toLowerCase()).filter(Boolean))].slice(0, 200);
+}
+
 router.get("/", async (req, res) => {
   try {
     const { search = "", type = "", status = "", page = 1, limit = 50 } = req.query;
@@ -90,6 +138,28 @@ router.get("/", async (req, res) => {
     }
     if (type) { where.push("p.type = ?"); params.push(type); }
     if (status) { where.push("p.status = ?"); params.push(status); }
+    // ADDED: State / City / Location filters - several values each (any of them matches)
+    const states = multi(req.query.states), cities = multi(req.query.cities), locations = multi(req.query.locations);
+    // PREVIOUS: if (states.length) { where.push("LOWER(TRIM(p.state)) IN (?)"); params.push(states); }
+    // PREVIOUS: if (cities.length) { where.push("LOWER(TRIM(p.city)) IN (?)"); params.push(cities); }
+    // UPDATED: a project matches a State if its saved state is that state, or (no state saved) its
+    // city is in that state, or (no city saved either) its location is an area of that state.
+    // The same for City: saved city, or (no city saved) its location is an area of that city.
+    const none = "__none__"; // keeps "IN (?)" valid when a list is empty
+    if (states.length) {
+      const sc = citiesOfStates(states); const sa = areasOfCities(sc);
+      where.push(`(LOWER(TRIM(p.state)) IN (?)
+        OR (COALESCE(TRIM(p.state),'') = '' AND LOWER(TRIM(p.city)) IN (?))
+        OR (COALESCE(TRIM(p.state),'') = '' AND COALESCE(TRIM(p.city),'') = '' AND LOWER(TRIM(p.location)) IN (?)))`);
+      params.push(states, sc.length ? sc : [none], sa.length ? sa : [none]);
+    }
+    if (cities.length) {
+      const ca = areasOfCities(cities);
+      where.push(`(LOWER(TRIM(p.city)) IN (?)
+        OR (COALESCE(TRIM(p.city),'') = '' AND LOWER(TRIM(p.location)) IN (?)))`);
+      params.push(cities, ca.length ? ca : [none]);
+    }
+    if (locations.length) { where.push("LOWER(TRIM(p.location)) IN (?)"); params.push(locations); }
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
     const lim = Math.min(Number(limit) || 50, 200);
